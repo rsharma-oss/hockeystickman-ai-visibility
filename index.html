@@ -64,6 +64,23 @@
     .stat-item:nth-child(2){border-right:none}
     .hero-headline{font-size:30px}
   }
+
+  /* CTAs */
+  .cta-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:36px}
+  .cta{display:flex;flex-direction:column;gap:10px;padding:28px 30px;border-radius:14px;text-decoration:none;color:inherit;transition:all .18s ease;position:relative;overflow:hidden;border:1px solid}
+  .cta:hover{transform:translateY(-2px);box-shadow:0 14px 38px rgba(0,0,0,0.45)}
+  .cta-primary{background:linear-gradient(135deg,#1A8C4E 0%,#0F5F36 100%);border-color:#1A8C4E}
+  .cta-primary .cta-eyebrow{color:#A7F3D0}
+  .cta-primary .cta-arrow{color:#fff}
+  .cta-secondary{background:linear-gradient(135deg,#1A1A1A 0%,#0A0A0A 100%);border-color:#333}
+  .cta-secondary:hover{border-color:#4ADE80}
+  .cta-secondary .cta-eyebrow{color:#888}
+  .cta-secondary .cta-arrow{color:#4ADE80}
+  .cta-eyebrow{font-size:11px;font-weight:800;letter-spacing:1.4px;text-transform:uppercase}
+  .cta-title{font-size:26px;font-weight:800;color:#fff;line-height:1.2;letter-spacing:-0.3px}
+  .cta-desc{font-size:13px;color:rgba(255,255,255,0.78);line-height:1.6;flex:1}
+  .cta-arrow{font-size:13px;font-weight:700;letter-spacing:0.3px;margin-top:6px}
+  @media(max-width:700px){.cta-row{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -130,6 +147,23 @@
       <div class="card-title">.ca Full Report — 6-tab interactive dashboard</div>
       <div class="card-desc">The complete picture: Overview, Prompts, Sentiment, Competitors, Citations, and Actions tabs. Includes filterable time ranges (7-day, 14-day, custom), per-model filters, and the underlying data. Best opened on desktop.</div>
       <div class="card-meta"><span class="card-stats">1.1 MB · interactive · ~15 min</span><span class="card-arrow">Open →</span></div>
+    </a>
+  </div>
+
+
+  <div class="section-title">Ready to move on this?</div>
+  <div class="cta-row">
+    <a class="cta cta-primary" href="./proposal.html">
+      <div class="cta-eyebrow">Pragmatic AEO · 13-slide proposal</div>
+      <div class="cta-title">View the proposal</div>
+      <div class="cta-desc">Investment, timeline, deliverables, and what changes for Hockey Stickman in 90 days. Already pre-populated with your audit findings.</div>
+      <div class="cta-arrow">Open proposal →</div>
+    </a>
+    <a class="cta cta-secondary" href="https://seo-for-ai.growthautomated.ai/book_time" target="_blank" rel="noopener">
+      <div class="cta-eyebrow">30-minute walkthrough</div>
+      <div class="cta-title">Book time with Rahul</div>
+      <div class="cta-desc">If a live walkthrough of the reports + proposal is more useful than reading, grab a slot. No prep needed; I drive.</div>
+      <div class="cta-arrow">Book a meeting →</div>
     </a>
   </div>
 

@@ -11,5 +11,6 @@ Live site: https://rsharma-oss.github.io/hockeystickman-ai-visibility/
 - `us-onepager.html` — hockeystickman.com first baseline
 - `ca-scorecard.html` — .ca scorecard with full prompt-level metrics
 - `ca-full-report.html` — .ca 6-tab interactive dashboard
+- `proposal.html` — 13-slide Pragmatic AEO service proposal
 
 Prepared by Growth Automated · growthautomated.ai · rahul@growthautomated.ai
