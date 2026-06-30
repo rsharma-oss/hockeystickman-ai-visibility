@@ -564,12 +564,12 @@ const PREFILL = {
 
   slide07subtitle: 'Pragmatic AEO inside Growth Automated — a Shopify Revenue Growth Agency',
 
-  monthlyPrice:  '2,500',
-  monthlyPrice2: '4,500',
-  tier1Label:    'Starter',
-  tier2Label:    'Growth',
-  tier1Total:    '7,500',
-  tier2Total:    '13,500',
+  monthlyPrice:  '$4,000',
+  monthlyPrice2: '',
+  tier1Label:    '',
+  tier2Label:    '',
+  tier1Total:    '',
+  tier2Total:    '',
   cmsType:       'Shopify',
   timelineM3:    'Target score 45–65/100 by end of month 3',
   closingPara:   'Hockey Stickman has the content, the expertise, and the Canadian story that AI models should be citing. The gap is structural — and it is fixable in weeks, not months. We have done this for WBM Technologies and Credit Canada. Both had zero AI citations before we started.',
@@ -584,7 +584,7 @@ const PREFILL = {
 
 window.onload = function() {
   let loaded = false;
-  const storageKey = 'pb_data_' + PREFILL.clientName.toLowerCase().replace(/[^a-z0-9]/g,'_') + '_v3';
+  const storageKey = 'pb_data_' + PREFILL.clientName.toLowerCase().replace(/[^a-z0-9]/g,'_') + '_v4';
   try {
     const existing = localStorage.getItem(storageKey);
     if (existing && existing !== '{}') {
@@ -722,7 +722,7 @@ function save() {
   fields.forEach(f => { const el = document.getElementById(f); if(el) D[f] = el.value; });
   const cc = document.getElementById('clientColor'); if(cc) D.clientColor = cc.value;
   const ac = document.getElementById('agencyColor'); if(ac) D.agencyColor = ac.value;
-  try { localStorage.setItem('pb_data_' + PREFILL.clientName.toLowerCase().replace(/[^a-z0-9]/g,'_') + '_v3', JSON.stringify(D)); } catch(e){}
+  try { localStorage.setItem('pb_data_' + PREFILL.clientName.toLowerCase().replace(/[^a-z0-9]/g,'_') + '_v4', JSON.stringify(D)); } catch(e){}
 }
 
 function loadFromStorage() {
