@@ -3,983 +3,17 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Proposal Builder</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-<style>
-*{box-sizing:border-box;margin:0;padding:0;font-family:'DM Sans',sans-serif}
-:root{
-  --ink:#171C33;--ink2:#3D4461;--ink3:#717185;--ink4:#A1A1B5;
-  --paper:#fff;--paper2:#F9FAFB;--paper3:#F3F4F6;--rule:#E5E7EB;
-  --accent:#6366f1;--accent-bg:#EEF2FF;--accent-bd:#C7D2FE;--accent-dark:#4338CA;
-  --ok:#16a34a;--ok-bg:#f0fdf4;--ok-bd:#bbf7d0;
-}
-html,body{height:100%;background:var(--paper2)}
-.layout{display:grid;grid-template-columns:260px 1fr;grid-template-rows:64px 1fr 72px;height:100vh}
-/* Top bar */
-.topbar{grid-column:1/-1;background:var(--paper);border-bottom:1px solid var(--rule);display:flex;align-items:center;gap:14px;padding:0 28px}
-.topbar-logo{font-size:17px;font-weight:700;color:var(--ink)}
-.topbar-sub{font-size:13px;color:var(--ink4)}
-/* Sidebar */
-.sidebar{background:var(--paper);border-right:1px solid var(--rule);padding:24px 16px;display:flex;flex-direction:column;gap:4px;overflow-y:auto}
-.step-item{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:8px;cursor:pointer;transition:background .15s}
-.step-item:hover{background:var(--paper2)}
-.step-item.active{background:var(--accent-bg)}
-.step-num{width:26px;height:26px;border-radius:50%;border:2px solid var(--rule);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--ink4);flex-shrink:0;font-family:'DM Mono',monospace}
-.step-item.active .step-num{background:var(--accent);border-color:var(--accent);color:#fff}
-.step-item.done .step-num{background:var(--ok);border-color:var(--ok);color:#fff}
-.step-label{font-size:13px;font-weight:500;color:var(--ink3)}
-.step-item.active .step-label{color:var(--ink);font-weight:600}
-/* Main content */
-.main{padding:32px 40px;overflow-y:auto}
-.step-content{display:none;max-width:680px}
-.step-content.active{display:block}
-.step-title{font-size:22px;font-weight:700;color:var(--ink);margin-bottom:4px}
-.step-desc{font-size:14px;color:var(--ink3);margin-bottom:28px;line-height:1.6}
-/* Form elements */
-.field-group{display:flex;flex-direction:column;gap:6px;margin-bottom:20px}
-.field-row{display:grid;gap:16px;margin-bottom:0}
-.field-row.col2{grid-template-columns:1fr 1fr}
-.field-row.col3{grid-template-columns:1fr 1fr 1fr}
-.field-row.col4{grid-template-columns:1fr 1fr 1fr 1fr}
-label{font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--ink3)}
-label span{font-weight:400;text-transform:none;letter-spacing:0;color:var(--ink4)}
-input[type=text],input[type=url],input[type=color],textarea,select{
-  width:100%;padding:9px 12px;border:1px solid var(--rule);border-radius:7px;font-size:14px;color:var(--ink);
-  background:var(--paper);transition:border-color .15s;outline:none;font-family:'DM Sans',sans-serif
-}
-input[type=text]:focus,input[type=url]:focus,textarea:focus{border-color:var(--accent)}
-input[type=color]{padding:4px 8px;height:38px;cursor:pointer}
-textarea{resize:vertical;min-height:70px;line-height:1.5}
-.hint{font-size:12px;color:var(--ink4);margin-top:4px}
-/* Section label */
-.section-sep{font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--ink4);padding:16px 0 8px;border-top:1px solid var(--rule);margin-top:8px}
-.section-sep:first-child{border-top:none;padding-top:0}
-/* Competitor rows */
-.comp-row{display:grid;grid-template-columns:160px 80px 120px 120px;gap:8px;align-items:end;margin-bottom:8px}
-.comp-row-header{display:grid;grid-template-columns:160px 80px 120px 120px;gap:8px;margin-bottom:4px}
-/* AI prompt rows */
-.prompt-row{display:grid;grid-template-columns:1fr 70px 70px 80px;gap:8px;align-items:end;margin-bottom:8px}
-.prompt-row-header{display:grid;grid-template-columns:1fr 70px 70px 80px;gap:8px;margin-bottom:4px}
-.source-row{display:grid;grid-template-columns:1fr 100px;gap:8px;align-items:end;margin-bottom:8px}
-/* Color preview */
-.color-preview-row{display:flex;align-items:center;gap:10px}
-.color-swatch{width:32px;height:32px;border-radius:6px;border:1px solid var(--rule);flex-shrink:0}
-.color-swatches{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
-.color-swatch-btn{width:28px;height:28px;border-radius:6px;border:2px solid transparent;cursor:pointer;transition:transform .1s}
-.color-swatch-btn:hover{transform:scale(1.15);border-color:var(--ink4)}
-/* Logo preview */
-.logo-preview{display:flex;align-items:center;gap:12px;padding:10px 14px;background:var(--paper2);border:1px solid var(--rule);border-radius:8px;margin-top:8px}
-.logo-preview img{height:24px;width:auto;object-fit:contain}
-/* Footer */
-.footer{grid-column:1/-1;background:var(--paper);border-top:1px solid var(--rule);display:flex;align-items:center;justify-content:space-between;padding:0 28px}
-.footer-left{font-size:13px;color:var(--ink4)}
-.btn{padding:9px 20px;border-radius:7px;font-size:14px;font-weight:600;cursor:pointer;border:none;transition:all .15s}
-.btn-ghost{background:transparent;color:var(--ink3);border:1px solid var(--rule)}
-.btn-ghost:hover{background:var(--paper2)}
-.btn-primary{background:var(--accent);color:#fff}
-.btn-primary:hover{background:var(--accent-dark)}
-.btn-success{background:var(--ok);color:#fff}
-.btn-success:hover{background:#15803d}
-.btn-group{display:flex;gap:10px}
-/* Generate step */
-.generate-card{background:var(--paper);border:1px solid var(--rule);border-radius:12px;padding:28px;margin-bottom:16px}
-.generate-card h3{font-size:16px;font-weight:700;color:var(--ink);margin-bottom:6px}
-.generate-card p{font-size:14px;color:var(--ink3);line-height:1.6}
-.summary-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:16px}
-.summary-item{background:var(--paper2);border-radius:6px;padding:10px 14px}
-.summary-item .k{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--ink4);margin-bottom:2px}
-.summary-item .v{font-size:14px;color:var(--ink);font-weight:500}
-/* Upload area */
-.upload-area{border:2px dashed var(--rule);border-radius:8px;padding:20px;text-align:center;cursor:pointer;transition:border-color .15s;margin-top:8px}
-.upload-area:hover{border-color:var(--accent)}
-.upload-area input{display:none}
-.upload-area p{font-size:13px;color:var(--ink4)}
-</style>
-</head>
-<body>
-<div class="layout">
-
-  <!-- Top bar -->
-  <div class="topbar">
-    <svg width="28" height="28" viewBox="0 0 28 28" fill="none"><rect width="28" height="28" rx="7" fill="#6366f1"/><path d="M8 14h12M14 8l6 6-6 6" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-    <div>
-      <div class="topbar-logo">Proposal Builder</div>
-      <div class="topbar-sub">Open-source SEO / AEO proposal generator</div>
-    </div>
-  </div>
-
-  <!-- Sidebar -->
-  <div class="sidebar" id="sidebar"></div>
-
-  <!-- Main content -->
-  <div class="main" id="main">
-
-    <!-- Step 0: Agency -->
-    <div class="step-content" data-step="0">
-      <div class="step-title">Your Agency</div>
-      <div class="step-desc">This is your brand. It appears in the top-right corner of every slide, replacing any previous branding. Set it once and it applies to every proposal you generate.</div>
-      <div class="field-group">
-        <label>Agency / Business Name</label>
-        <input type="text" id="agencyName" placeholder="e.g. Growth Agency Co." oninput="save()">
-      </div>
-      <div class="field-row col2">
-        <div class="field-group">
-          <label>Website URL</label>
-          <input type="url" id="agencyWebsite" placeholder="https://yoursite.com" oninput="save()">
-        </div>
-        <div class="field-group">
-          <label>Booking / Contact Link <span>(for CTAs)</span></label>
-          <input type="url" id="agencyBooking" placeholder="https://calendly.com/you/30min" oninput="save()">
-        </div>
-      </div>
-      <div class="field-group">
-        <label>Logo URL <span>— shown top-right on every slide</span></label>
-        <input type="url" id="agencyLogo" placeholder="https://yoursite.com/logo.png" oninput="save();updateLogoPreview()">
-        <div class="logo-preview" id="logoPreview" style="display:none">
-          <img id="logoImg" src="" alt="Logo preview">
-          <span style="font-size:13px;color:var(--ink4)">Preview</span>
-        </div>
-        <div class="hint">Tip: use a dark/black version of your logo for best results on white slides. PNG or SVG preferred.</div>
-      </div>
-      <div class="upload-area" onclick="document.getElementById('logoUpload').click()">
-        <input type="file" id="logoUpload" accept="image/*" onchange="handleLogoUpload(event)">
-        <p>Or upload a logo file — it will be embedded as base64</p>
-      </div>
-      <div class="field-group" style="margin-top:20px">
-        <label>Brand Colour</label>
-        <div class="color-preview-row">
-          <input type="color" id="agencyColor" value="#6366f1" oninput="save();updateColorPreview('agency')">
-          <span style="font-size:13px;color:var(--ink3)" id="agencyColorHex">#6366f1</span>
-        </div>
-        <div class="color-swatches">
-          <div class="color-swatch-btn" style="background:#6366f1" onclick="setColor('agency','#6366f1')" title="Indigo"></div>
-          <div class="color-swatch-btn" style="background:#0ea5e9" onclick="setColor('agency','#0ea5e9')" title="Sky"></div>
-          <div class="color-swatch-btn" style="background:#10b981" onclick="setColor('agency','#10b981')" title="Emerald"></div>
-          <div class="color-swatch-btn" style="background:#f59e0b" onclick="setColor('agency','#f59e0b')" title="Amber"></div>
-          <div class="color-swatch-btn" style="background:#ef4444" onclick="setColor('agency','#ef4444')" title="Red"></div>
-          <div class="color-swatch-btn" style="background:#8b5cf6" onclick="setColor('agency','#8b5cf6')" title="Violet"></div>
-          <div class="color-swatch-btn" style="background:#ec4899" onclick="setColor('agency','#ec4899')" title="Pink"></div>
-          <div class="color-swatch-btn" style="background:#171C33" onclick="setColor('agency','#171C33')" title="Dark"></div>
-        </div>
-      </div>
-      <div class="field-group">
-        <label>Your Tracking / Analytics Tool <span>— shown on the "Measuring Success" slide</span></label>
-        <div class="field-row col2">
-          <div>
-            <input type="text" id="agencyToolName" placeholder="e.g. Ahrefs, SEMrush, Semji" oninput="save()">
-          </div>
-          <div>
-            <input type="url" id="agencyToolLogo" placeholder="Tool logo URL" oninput="save()">
-          </div>
-        </div>
-        <input type="url" id="agencyToolWebsite" placeholder="Tool website URL" oninput="save()" style="margin-top:8px">
-        <textarea id="agencyToolDesc" placeholder="One sentence: what does this tool track for your clients?" oninput="save()" style="margin-top:8px;min-height:50px"></textarea>
-      </div>
-    </div>
-
-    <!-- Step 1: Client -->
-    <div class="step-content" data-step="1">
-      <div class="step-title">Client Info</div>
-      <div class="step-desc">The company you're pitching. Their favicon is auto-fetched from their domain and appears on every slide header.</div>
-      <div class="field-group">
-        <label>Client / Company Name</label>
-        <input type="text" id="clientName" placeholder="e.g. Floqer" oninput="save()">
-      </div>
-      <div class="field-row col2">
-        <div class="field-group">
-          <label>Domain <span>(no https://)</span></label>
-          <input type="text" id="clientDomain" placeholder="e.g. floqer.com" oninput="save()">
-        </div>
-        <div class="field-group">
-          <label>Proposal Date</label>
-          <input type="text" id="proposalDate" placeholder="e.g. May 2026" oninput="save()">
-        </div>
-      </div>
-      <div class="field-group">
-        <label>Client Logo URL <span>— overrides favicon on every slide header (SVG, PNG, or WebP)</span></label>
-        <input type="text" id="clientLogo" placeholder="e.g. https://example.com/logo.svg" oninput="save();updateClientLogoPreview()">
-        <div id="clientLogoPreview" style="margin-top:8px;display:none">
-          <img id="clientLogoImg" src="" style="height:32px;width:auto;max-width:180px;object-fit:contain;border:1px solid var(--rule);border-radius:6px;padding:4px 8px;background:#fff">
-        </div>
-      </div>
-      <div class="field-group">
-        <label>Accent Colour <span>— tints slides to match their brand</span></label>
-        <div class="color-preview-row">
-          <input type="color" id="clientColor" value="#0ea5e9" oninput="save();updateColorPreview('client')">
-          <span style="font-size:13px;color:var(--ink3)" id="clientColorHex">#0ea5e9</span>
-        </div>
-        <div class="color-swatches">
-          <div class="color-swatch-btn" style="background:#FF4F12" onclick="setColor('client','#FF4F12')" title="Floqer Orange"></div>
-          <div class="color-swatch-btn" style="background:#0ea5e9" onclick="setColor('client','#0ea5e9')" title="Sky"></div>
-          <div class="color-swatch-btn" style="background:#6366f1" onclick="setColor('client','#6366f1')" title="Indigo"></div>
-          <div class="color-swatch-btn" style="background:#10b981" onclick="setColor('client','#10b981')" title="Emerald"></div>
-          <div class="color-swatch-btn" style="background:#f59e0b" onclick="setColor('client','#f59e0b')" title="Amber"></div>
-          <div class="color-swatch-btn" style="background:#8b5cf6" onclick="setColor('client','#8b5cf6')" title="Violet"></div>
-          <div class="color-swatch-btn" style="background:#171C33" onclick="setColor('client','#171C33')" title="Dark"></div>
-        </div>
-      </div>
-      <div class="field-group">
-        <label>Buyer Type <span>— who their customers are, used in multiple slides</span></label>
-        <input type="text" id="buyerType" placeholder="e.g. ecommerce merchants, hotel operators, SaaS founders" oninput="save()">
-      </div>
-    </div>
-
-    <!-- Step 2: The Hook -->
-    <div class="step-content" data-step="2">
-      <div class="step-title">The Hook</div>
-      <div class="step-desc">Slide 1 is your cover. The headline should name the client's specific problem or opportunity. The subline reframes it as something you can solve.</div>
-      <div class="field-group">
-        <label>Headline</label>
-        <textarea id="slide01headline" placeholder="e.g. How Floqer Can Own AI Search in CRM Enrichment & GTM Data" oninput="save()" style="min-height:80px"></textarea>
-        <div class="hint">Be specific to their niche. Mention the category they want to own.</div>
-      </div>
-      <div class="field-group">
-        <label>Subline</label>
-        <textarea id="slide01subline" placeholder="e.g. You have the right product. The gap is visibility. Every GTM team asking AI about CRM enrichment gets sent to ZoomInfo or Clay. Here is how to change that." oninput="save()" style="min-height:100px"></textarea>
-        <div class="hint">Max 2 sentences. State what's broken, then tease the fix.</div>
-      </div>
-    </div>
-
-    <!-- Step 3: Gaps -->
-    <div class="step-content" data-step="3">
-      <div class="step-title">The Gaps</div>
-      <div class="step-desc">Slide 3 shows 4 specific reasons why the client is losing ground today. Each card has a short title and a 1-2 sentence explanation.</div>
-      <div class="field-group">
-        <label>Slide Title</label>
-        <input type="text" id="slide03title" placeholder="e.g. Why Floqer Is Invisible in AI Search Today" oninput="save()">
-      </div>
-      <div class="field-group">
-        <label>Slide Subtitle</label>
-        <input type="text" id="slide03subtitle" placeholder="e.g. Three structural gaps are keeping you out of AI answers." oninput="save()">
-      </div>
-      <div class="section-sep">Gap Cards</div>
-      <div id="gapCards"></div>
-    </div>
-
-    <!-- Step 4: SEO Data -->
-    <div class="step-content" data-step="4">
-      <div class="step-title">SEO Data</div>
-      <div class="step-desc">Slide 4 shows how the client compares to competitors on Domain Rating, keyword count, and traffic. Pull this from Ahrefs or SEMrush.</div>
-      <div class="section-sep">Client metrics</div>
-      <div class="field-row col4" style="margin-bottom:16px">
-        <div class="field-group"><label>DR</label><input type="text" id="clientDR" placeholder="42" oninput="save()"></div>
-        <div class="field-group"><label>Org. Keywords</label><input type="text" id="clientKeywords" placeholder="1,200" oninput="save()"></div>
-        <div class="field-group"><label>Monthly Traffic</label><input type="text" id="clientTraffic" placeholder="8,500" oninput="save()"></div>
-        <div class="field-group"><label>Ref. Domains</label><input type="text" id="clientRefDomains" placeholder="310" oninput="save()"></div>
-      </div>
-      <div class="section-sep">Competitors (up to 4)</div>
-      <div class="comp-row-header">
-        <label>Domain</label><label>DR</label><label>Keywords</label><label>Traffic</label>
-      </div>
-      <div id="compRows"></div>
-      <div class="field-group" style="margin-top:16px">
-        <label>Callout <span>— one-line insight below the table</span></label>
-        <input type="text" id="slide04callout" placeholder="e.g. ZoomInfo outranks you on 40+ high-intent keywords you don't appear for at all." oninput="save()">
-      </div>
-    </div>
-
-    <!-- Step 5: AI Visibility -->
-    <div class="step-content" data-step="5">
-      <div class="step-title">AI Visibility</div>
-      <div class="step-desc">Slide 5 shows the client's AI presence score and which prompts they appear (or don't appear) in. Pull from your preferred AI visibility tracking tool.</div>
-      <div class="section-sep">Key metrics</div>
-      <div class="field-row col4" style="margin-bottom:16px">
-        <div class="field-group"><label>AI Score</label><input type="text" id="aiScore" placeholder="23/100" oninput="save()"></div>
-        <div class="field-group"><label>AI Rank</label><input type="text" id="aiRank" placeholder="#8 in category" oninput="save()"></div>
-        <div class="field-group"><label>Citations</label><input type="text" id="aiCitations" placeholder="4" oninput="save()"></div>
-        <div class="field-group"><label>AI Chats/mo</label><input type="text" id="aiChats" placeholder="12,000" oninput="save()"></div>
-      </div>
-      <div class="section-sep">Prompts (up to 6)</div>
-      <div class="prompt-row-header">
-        <label>Prompt text</label><label>Mentions</label><label>Score</label><label>Status</label>
-      </div>
-      <div id="promptRows"></div>
-      <div class="section-sep">Top cited sources (up to 6)</div>
-      <div id="sourceRows"></div>
-      <div class="field-group" style="margin-top:16px">
-        <label>Callout</label>
-        <input type="text" id="slide05callout" placeholder="e.g. ChatGPT recommends ZoomInfo 8x more than Floqer for the same queries." oninput="save()">
-      </div>
-    </div>
-
-    <!-- Step 6: Keywords & Close -->
-    <div class="step-content" data-step="6">
-      <div class="step-title">Keywords & Close</div>
-      <div class="step-desc">Three keyword clusters for slide 6, plus the pricing, timeline details, and closing slide content.</div>
-      <div class="section-sep">Keyword clusters (Slide 6)</div>
-      <div id="kwClusters"></div>
-      <div class="field-group">
-        <label>Slide 6 Callout</label>
-        <input type="text" id="slide06callout" placeholder="e.g. These 9 keywords alone represent 8,000+ monthly searches with clear buyer intent." oninput="save()">
-      </div>
-      <div class="section-sep">Competitor capture (Slide 7)</div>
-      <div class="hint" style="margin-bottom:12px">Enter 4–6 competitor domains you'll create comparison/alternative content against.</div>
-      <div id="compAltRows"></div>
-      <div class="field-group" style="margin-top:12px">
-        <label>Buyer context sentence <span>— e.g. "These are the tools [buyers] already use."</span></label>
-        <input type="text" id="slide07subtitle" placeholder="e.g. These are the tools GTM teams already use when they search for alternatives." oninput="save()">
-      </div>
-      <div class="section-sep">Investment & Timeline (Slide 11)</div>
-      <div class="field-row col3">
-        <div class="field-group"><label>Tier 1 Label</label><input type="text" id="tier1Label" placeholder="Full Pilot" oninput="save()"></div>
-        <div class="field-group"><label>Tier 1 Monthly Price</label><input type="text" id="monthlyPrice2" placeholder="$3,832.50" oninput="save()"></div>
-        <div class="field-group"><label>Tier 1 Total (6-mo)</label><input type="text" id="tier1Total" placeholder="$22,995" oninput="save()"></div>
-        <div class="field-group"><label>Tier 2 Label</label><input type="text" id="tier2Label" placeholder="Accelerate" oninput="save()"></div>
-        <div class="field-group"><label>Tier 2 Monthly Price</label><input type="text" id="monthlyPrice" placeholder="$4,935" oninput="save()"></div>
-        <div class="field-group"><label>Tier 2 Total (6-mo)</label><input type="text" id="tier2Total" placeholder="$29,610" oninput="save()"></div>
-        <div class="field-group"><label>CMS Type</label><input type="text" id="cmsType" placeholder="WordPress" oninput="save()"></div>
-        <div class="field-group"><label>Month 3 competitors</label><input type="text" id="timelineM3" placeholder="ZoomInfo, Clearbit, Clay" oninput="save()"></div>
-      </div>
-      <div class="section-sep">Slide Overrides — fine-tune individual slides</div>
-      <div class="field-group">
-        <label>Slide 8 · Deliverables callout <span>— one-line summary under the deliverables list</span></label>
-        <input type="text" id="slide08callout" placeholder="e.g. Every deliverable is designed to make AI cite you first." oninput="save()">
-      </div>
-      <div class="field-group">
-        <label>Slide 9 · Measuring success note <span>— bottom caption on the ROI / tracking slide</span></label>
-        <input type="text" id="slide09note" placeholder="e.g. AI Peekaboo tracks every prompt weekly so you see the lift in real time." oninput="save()">
-      </div>
-      <div class="field-group">
-        <label>Slide 10 · Investment headline override <span>— replaces default "Your Investment. What We Deliver and When."</span></label>
-        <input type="text" id="slide10headline" placeholder="e.g. Your Investment. Built to Compound." oninput="save()">
-      </div>
-      <div class="field-group">
-        <label>Slide 10 · How It Works — bullet 1</label>
-        <input type="text" id="howItWorks1" placeholder="Work begins in week one, no ramp-up delay" oninput="save()">
-      </div>
-      <div class="field-group">
-        <label>Slide 10 · How It Works — bullet 2</label>
-        <input type="text" id="howItWorks2" placeholder="Monthly strategy call to review results and set priorities" oninput="save()">
-      </div>
-      <div class="field-group">
-        <label>Slide 10 · How It Works — bullet 3</label>
-        <input type="text" id="howItWorks3" placeholder="6-month minimum, then cancel anytime with 30 days notice" oninput="save()">
-      </div>
-      <div class="section-sep">Slide Overrides — fine-tune individual slides</div>
-      <div class="field-group">
-        <label>Slide 8 · Deliverables callout</label>
-        <input type="text" id="slide08callout" placeholder="e.g. Every deliverable is designed to make AI cite you first." oninput="save()">
-      </div>
-      <div class="field-group">
-        <label>Slide 9 · Measuring success note</label>
-        <input type="text" id="slide09note" placeholder="e.g. AI Peekaboo tracks every prompt weekly so you see the lift in real time." oninput="save()">
-      </div>
-      <div class="field-group">
-        <label>Slide 10 · Investment headline override</label>
-        <input type="text" id="slide10headline" placeholder="e.g. Your Investment. Built to Compound." oninput="save()">
-      </div>
-      <div class="field-group"><label>Slide 10 · How It Works — bullet 1</label><input type="text" id="howItWorks1" placeholder="Work begins in week one, no ramp-up delay" oninput="save()"></div>
-      <div class="field-group"><label>Slide 10 · How It Works — bullet 2</label><input type="text" id="howItWorks2" placeholder="Monthly strategy call to review results and set priorities" oninput="save()"></div>
-      <div class="field-group"><label>Slide 10 · How It Works — bullet 3</label><input type="text" id="howItWorks3" placeholder="6-month minimum, then cancel anytime with 30 days notice" oninput="save()"></div>
-      <div class="section-sep">Closing (Slide 12)</div>
-      <div class="field-group">
-        <label>Closing paragraph</label>
-        <textarea id="closingPara" placeholder="e.g. You've seen where Floqer stands, who is getting cited instead, and exactly what we'd build to change that. Every day without content is another day buyers find ZoomInfo instead of Floqer." oninput="save()" style="min-height:80px"></textarea>
-      </div>
-    </div>
-
-    <!-- Step 7: AI Visibility Slide 13 -->
-    <div class="step-content" data-step="7">
-      <div class="step-title">AI Visibility Data (Slide 13)</div>
-      <div class="step-desc">This data powers the AI Visibility Snapshot slide. It pulls from your AI Peekaboo account. The score, rank, and citation data here will appear in the dedicated slide 13 as a visual donut gauge and prompt table.</div>
-      <div class="hint" style="margin-bottom:16px">The prompts, sources, and competitor data from earlier steps automatically populate this slide. Just verify the score and rank fields are filled in Step 5.</div>
-      <div class="field-group">
-        <label>AI Score <span>— numeric 0–100 from Peekaboo</span></label>
-        <input type="text" id="aiScore2_note" disabled value="Pulled from Step 5 — AI Score field" style="background:var(--paper2);color:var(--ink4)">
-      </div>
-      <div class="generate-card">
-        <h3>Slide 13 uses your existing data</h3>
-        <p>The AI Visibility Snapshot slide automatically uses the score, rank, citations, prompts, and sources you entered in earlier steps. No additional data entry needed — just make sure those fields are complete.</p>
-      </div>
-    </div>
-
-    <!-- Step 8: Generate -->
-    <div class="step-content" data-step="8">
-      <div class="step-title">Generate & Download</div>
-      <div class="step-desc">Review your settings, then generate the proposal as a standalone HTML file. Open it in Chrome, navigate slides with arrow keys, and export to PDF via <strong>Print → Save as PDF</strong> (landscape, no margins, background graphics on).</div>
-      <div class="generate-card">
-        <h3>Summary</h3>
-        <div class="summary-grid" id="summaryGrid"></div>
-      </div>
-      <div class="generate-card">
-        <h3>PDF Export</h3>
-        <p>After generating, add <code style="background:var(--paper3);padding:2px 6px;border-radius:4px;font-family:'DM Mono',monospace">?print-pdf</code> to the URL in Chrome, then use <strong>Cmd+P → Save as PDF</strong> with layout set to Landscape, margins None, and "Background graphics" checked.</p>
-      </div>
-      <div style="display:flex;gap:12px;margin-top:8px">
-        <button class="btn btn-primary" onclick="generateAndPreview()" style="padding:12px 28px;font-size:15px">Preview in New Tab</button>
-        <button class="btn btn-success" onclick="generateAndDownload()" style="padding:12px 28px;font-size:15px">Download HTML</button>
-      </div>
-    </div>
-
-  </div><!-- /main -->
-
-  <!-- Footer -->
-  <div class="footer">
-    <div class="footer-left" id="footerLeft">Step 1 of 9</div>
-    <div class="btn-group">
-      <button class="btn btn-ghost" id="btnBack" onclick="prevStep()">Back</button>
-      <button class="btn btn-primary" id="btnNext" onclick="nextStep()">Next</button>
-    </div>
-  </div>
-
-</div><!-- /layout -->
-
-<script>
-// ─────────────────────────────────────────────
-// DATA MODEL
-// ─────────────────────────────────────────────
-const D = {
-  agencyName:'', agencyWebsite:'', agencyLogo:'', agencyColor:'#6366f1',
-  agencyBooking:'', agencyToolName:'', agencyToolLogo:'', agencyToolWebsite:'', agencyToolDesc:'',
-  clientName:'', clientDomain:'', clientLogo:'', clientColor:'#0ea5e9', proposalDate:'', buyerType:'',
-  slide01headline:'', slide01subline:'',
-  slide03title:'', slide03subtitle:'',
-  gaps: [{title:'',body:''},{title:'',body:''},{title:'',body:''},{title:'',body:''},{title:'',body:''},{title:'',body:''}],
-  clientDR:'', clientKeywords:'', clientTraffic:'', clientRefDomains:'',
-  comps:[{name:'',domain:'',dr:'',kw:'',traffic:''},{name:'',domain:'',dr:'',kw:'',traffic:''},
-         {name:'',domain:'',dr:'',kw:'',traffic:''},{name:'',domain:'',dr:'',kw:'',traffic:''}],
-  slide04callout:'',
-  aiScore:'', aiRank:'', aiCitations:'', aiChats:'',
-  prompts:[{text:'',mentions:'',score:'',status:'warn'},{text:'',mentions:'',score:'',status:'red'},
-           {text:'',mentions:'',score:'',status:'red'},{text:'',mentions:'',score:'',status:'warn'},
-           {text:'',mentions:'',score:'',status:'red'},{text:'',mentions:'',score:'',status:'ok'}],
-  sources:[{domain:'',mentions:''},{domain:'',mentions:''},{domain:'',mentions:''},
-           {domain:'',mentions:''},{domain:'',mentions:''},{domain:'',mentions:''}],
-  slide05callout:'',
-  kwClusters:[{title:'',kw1:'',kw2:'',kw3:''},{title:'',kw1:'',kw2:'',kw3:''},{title:'',kw1:'',kw2:'',kw3:''}],
-  slide06callout:'',
-  compAlts:[{domain:'',label:''},{domain:'',label:''},{domain:'',label:''},
-            {domain:'',label:''},{domain:'',label:''},{domain:'',label:''}],
-  slide07subtitle:'',
-  monthlyPrice:'$4,935', monthlyPrice2:'$3,832.50', tier1Label:'Full Pilot ✓', tier2Label:'Accelerate', tier1Total:'$22,995', tier2Total:'$29,610', cmsType:'', timelineM3:'', closingPara:'',
-  slide08callout:'', slide09note:'', slide10headline:'', howItWorks1:'', howItWorks2:'', howItWorks3:'',
-};
-
-let currentStep = 0;
-const STEPS = [
-  {label:'Your Agency'}, {label:'Client Info'}, {label:'The Hook'},
-  {label:'The Gaps'}, {label:'SEO Data'}, {label:'AI Visibility'},
-  {label:'Keywords & Close'}, {label:'AI Data'}, {label:'Generate'},
-];
-
-// ─────────────────────────────────────────────
-// INIT
-// ─────────────────────────────────────────────
-// ── Hockey Stickman pre-fill ──────────────────────────────────────────────
-const PREFILL = {
-  agencyName: 'Growth Automated',
-  agencyWebsite: 'https://growthautomated.ai',
-  agencyLogo: 'https://cdn.shopify.com/s/files/1/0813/6707/3081/files/Color_logo_-_no_background_1f36d52b-3764-407f-930c-151eb23683f7.png?v=1740765450',
-  agencyColor: '#334FB4',
-  agencyBooking: 'https://seo-for-ai.growthautomated.ai/book_time',
-  agencyToolName: 'AI Peekaboo',
-  agencyToolLogo: '',
-  agencyToolWebsite: 'https://www.aipeekaboo.com',
-  agencyToolDesc: 'Tracks brand visibility across ChatGPT, Gemini, Perplexity, Google AIO, and Google AI Mode.',
-
-  clientName: 'Hockey Stickman',
-  clientDomain: 'hockeystickman.ca',
-  clientLogo: '',
-  clientColor: '#CC1F1F',
-  proposalDate: 'June 2026',
-  buyerType: 'eCommerce',
-
-  slide01headline: '290 articles. 15 years of expertise. AI sends hockey shoppers to Reddit instead.',
-  slide01subline: 'Hockey Stickman ranks #1 for AI visibility in hockey retail — above Bauer and CCM. Here is what that means, and what to do next.',
-
-  slide03title: 'AI models don\'t know Hockey Stickman exists',
-  slide03subtitle: 'On 8 of 10 buying queries, your brand earns zero AI mentions. Reddit (42 citations), prostockhockey.com (40), and YouTube (38) own the category. The opportunity is wide open — and you are already leading your competitors.',
-
-  gaps: [
-    {
-      title: 'llms.txt describes checkout, not expertise',
-      body: 'Your llms.txt exists but only documents Shopify\'s commerce protocol — cart creation, checkout flow, agent purchasing. AI reads this and classifies you as a store, not a knowledge source. No mention of your 290 articles, Pro Blackout™ line, or 15 years of pro stock expertise.'
-    },
-    {
-      title: '290 articles — no hub page AI can cite',
-      body: 'You\'ve written about flex ratings, stick length, composite vs wood, defenseman sticks — exactly the queries where you score zero. The content is scattered across 290 blog posts. AI prefers one consolidated FAQ-structured authority page over a blog archive.'
-    },
-    {
-      title: 'US site earns 5x more AI citations than .ca',
-      body: 'hockeystickman.com earns 5 AI citations (Google AIO + Gemini). hockeystickman.ca earns zero. Your Canadian shoppers are being directed to American sources while your own .com domain captures some US traffic.'
-    }
-  ],
-
-  clientDR: '—',
-  clientKeywords: 'hockey sticks, pro stock hockey sticks, hockey equipment Canada',
-  clientTraffic: '—',
-  clientRefDomains: '—',
-
-  comps: [
-    { domain: 'bauerhockey.org',       dr: '—', kw: '—', traffic: '—'      },
-    { domain: 'ccmhockey.com',         dr: '—', kw: '—', traffic: '204,499' },
-    { domain: 'hockeyshot.com',        dr: '—', kw: '—', traffic: '19,437'  },
-    { domain: 'howieshockeytape.com',  dr: '—', kw: '—', traffic: '35,115'  }
-  ],
-
-  slide04callout: 'Bauer scores 4/100. CCM scores 2/100. HockeyShot and Howies score 0. The entire hockey retail category is invisible to AI — and Hockey Stickman is already ranked first among all of them.',
-
-  aiScore: '5',
-  aiRank: '#1 of 5 tracked brands',
-  aiCitations: '5 (.com only)',
-  aiChats: '10 prompts tracked',
-
-  prompts: [
-    { text: 'Best hockey sticks for advanced players in 2026?',                          mentions: '0', score: '0',  status: 'not mentioned' },
-    { text: 'Do stick flex ratings really matter for casual players?',                   mentions: '0', score: '0',  status: 'not mentioned' },
-    { text: 'How do I figure out the right stick length as a beginner?',                 mentions: '0', score: '0',  status: 'not mentioned' },
-    { text: 'Composite vs wooden hockey sticks for intermediate players?',               mentions: '0', score: '0',  status: 'not mentioned' },
-    { text: 'Our rec league needs affordable hockey sticks — options under budget?',     mentions: '2', score: '28', status: 'mentioned'     },
-    { text: 'Top-rated hockey sticks for defensemen — what\'s worth the hype?',          mentions: '0', score: '0',  status: 'not mentioned' },
-    { text: 'What hockey sticks are youth coaches recommending for beginners?',          mentions: '0', score: '0',  status: 'not mentioned' },
-    { text: 'What\'s the proper way to tape a hockey stick blade, and why?',             mentions: '2', score: '25', status: 'mentioned'     }
-  ],
-
-  sources: [
-    { domain: 'reddit.com',            mentions: '42' },
-    { domain: 'prostockhockey.com',    mentions: '40' },
-    { domain: 'youtube.com',           mentions: '38' },
-    { domain: 'hockeymonkey.com',      mentions: '25' },
-    { domain: 'icewarehouse.com',      mentions: '17' }
-  ],
-
-  slide05callout: 'Reddit earns 42 AI citations in the hockey sticks category. prostockhockey.com earns 40. Hockey Stickman .ca earns 0 — while the .com domain earns 5. Your Canadian shoppers are being sent to American sites.',
-
-  kwClusters: [
-    { title: '', kw1: '', kw2: '', kw3: '' },
-    { title: '', kw1: '', kw2: '', kw3: '' },
-    { title: '', kw1: '', kw2: '', kw3: '' }
-  ],
-
-  slide06callout: 'Three structured changes — expanding llms.txt, building a stick selector hub with FAQ schema, and publishing a Pro Stock Canada guide — are projected to lift the AI score from 5 to 45-65 within 90 days.',
-
-  compAlts: [
-    { domain: '', label: '' },
-    { domain: '', label: '' },
-    { domain: '', label: '' },
-    { domain: '', label: '' },
-    { domain: '', label: '' },
-    { domain: '', label: '' }
-  ],
-
-  slide07subtitle: 'Pragmatic AEO inside Growth Automated — a Shopify Revenue Growth Agency',
-
-  monthlyPrice:  '$4,000',
-  monthlyPrice2: '',
-  tier1Label:    '',
-  tier2Label:    '',
-  tier1Total:    '',
-  tier2Total:    '',
-  cmsType:       'Shopify',
-  timelineM3:    'Target score 45–65/100 by end of month 3',
-  closingPara:   'Hockey Stickman has the content, the expertise, and the Canadian story that AI models should be citing. The gap is structural — and it is fixable in weeks, not months. We have done this for WBM Technologies and Credit Canada. Both had zero AI citations before we started.',
-
-  slide08callout: 'We track visibility across ChatGPT, Gemini, Perplexity, Google AIO, and Google AI Mode — 5 models, live data, updated weekly.',
-  slide09note:    'Recent clients include WBM Technologies and Credit Canada — both had zero AI citations before we started.',
-  slide10headline: 'Ready to own the hockey category in AI?',
-  howItWorks1:   'We audit your 290+ articles and identify which ones are closest to ranking in AI answers — then structure them for citation.',
-  howItWorks2:   'We expand your llms.txt from a commerce protocol into an authority brief that tells AI models what Hockey Stickman knows.',
-  howItWorks3:   'We build the Pro Stock Canada guide and Stick Selector hub — the two pages that will flip prostockhockey.com\'s 40 citations to yours.'
-}
-
-window.onload = function() {
-  let loaded = false;
-  const storageKey = 'pb_data_' + PREFILL.clientName.toLowerCase().replace(/[^a-z0-9]/g,'_') + '_v4';
-  try {
-    const existing = localStorage.getItem(storageKey);
-    if (existing && existing !== '{}') {
-      const parsed = JSON.parse(existing);
-      Object.assign(D, parsed);
-      loaded = true;
-    }
-  } catch(e) {}
-  if (!loaded) {
-    Object.assign(D, PREFILL);
-    localStorage.setItem(storageKey, JSON.stringify(PREFILL));
-  }
-  buildSidebar();
-  buildDynamicFields();
-  renderStep(0);
-  syncInputsToD();
-};
-
-function buildSidebar() {
-  const sb = document.getElementById('sidebar');
-  sb.innerHTML = STEPS.map((s,i) =>
-    `<div class="step-item" id="sideStep${i}" onclick="goStep(${i})">
-      <div class="step-num">${i+1}</div>
-      <div class="step-label">${s.label}</div>
-    </div>`
-  ).join('');
-}
-
-function buildDynamicFields() {
-  // Gap cards
-  const gc = document.getElementById('gapCards');
-  gc.innerHTML = D.gaps.map((g,i) => `
-    <div style="background:var(--paper2);border:1px solid var(--rule);border-radius:8px;padding:16px;margin-bottom:12px">
-      <div style="font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--ink4);margin-bottom:10px">Gap ${i+1}</div>
-      <div class="field-group" style="margin-bottom:10px">
-        <label>Title</label>
-        <input type="text" id="gap${i}title" placeholder="e.g. No AI Citation Presence" oninput="saveGap(${i})" value="${esc(g.title)}">
-      </div>
-      <div class="field-group" style="margin-bottom:0">
-        <label>Explanation</label>
-        <textarea id="gap${i}body" placeholder="e.g. When a GTM team asks ChatGPT about CRM enrichment tools, your name doesn't appear..." oninput="saveGap(${i})">${esc(g.body)}</textarea>
-      </div>
-    </div>`).join('');
-
-  // Competitor rows
-  const cr = document.getElementById('compRows');
-  cr.innerHTML = D.comps.map((c,i) => `
-    <div class="comp-row">
-      <input type="text" id="comp${i}domain" placeholder="zoominfo.com" oninput="saveComp(${i})" value="${esc(c.domain)}">
-      <input type="text" id="comp${i}dr" placeholder="82" oninput="saveComp(${i})" value="${esc(c.dr)}">
-      <input type="text" id="comp${i}kw" placeholder="42,000" oninput="saveComp(${i})" value="${esc(c.kw)}">
-      <input type="text" id="comp${i}traffic" placeholder="180,000" oninput="saveComp(${i})" value="${esc(c.traffic)}">
-    </div>`).join('');
-
-  // Prompt rows
-  const pr = document.getElementById('promptRows');
-  pr.innerHTML = D.prompts.map((p,i) => `
-    <div class="prompt-row">
-      <input type="text" id="prompt${i}text" placeholder="best CRM enrichment tools" oninput="savePrompt(${i})" value="${esc(p.text)}">
-      <input type="text" id="prompt${i}mentions" placeholder="0" oninput="savePrompt(${i})" value="${esc(p.mentions)}">
-      <input type="text" id="prompt${i}score" placeholder="5/100" oninput="savePrompt(${i})" value="${esc(p.score)}">
-      <select id="prompt${i}status" onchange="savePrompt(${i})">
-        <option value="ok" ${p.status==='ok'?'selected':''}>Green</option>
-        <option value="warn" ${p.status==='warn'?'selected':''}>Orange</option>
-        <option value="red" ${p.status==='red'?'selected':''}>Red</option>
-      </select>
-    </div>`).join('');
-
-  // Source rows
-  const sr = document.getElementById('sourceRows');
-  sr.innerHTML = D.sources.map((s,i) => `
-    <div class="source-row">
-      <input type="text" id="source${i}domain" placeholder="g2.com" oninput="saveSource(${i})" value="${esc(s.domain)}">
-      <input type="text" id="source${i}mentions" placeholder="24 mentions" oninput="saveSource(${i})" value="${esc(s.mentions)}">
-    </div>`).join('');
-
-  // Keyword clusters
-  const kw = document.getElementById('kwClusters');
-  kw.innerHTML = D.kwClusters.map((c,i) => `
-    <div style="background:var(--paper2);border:1px solid var(--rule);border-radius:8px;padding:14px;margin-bottom:10px">
-      <div style="font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--ink4);margin-bottom:10px">Cluster ${i+1}</div>
-      <div class="field-row col4">
-        <div class="field-group"><label>Cluster Title</label><input type="text" id="kw${i}title" placeholder="e.g. Comparison" oninput="saveKw(${i})" value="${esc(c.title)}"></div>
-        <div class="field-group"><label>Keyword 1</label><input type="text" id="kw${i}kw1" placeholder="best clay alternatives" oninput="saveKw(${i})" value="${esc(c.kw1)}"></div>
-        <div class="field-group"><label>Keyword 2</label><input type="text" id="kw${i}kw2" placeholder="clay vs floqer" oninput="saveKw(${i})" value="${esc(c.kw2)}"></div>
-        <div class="field-group"><label>Keyword 3</label><input type="text" id="kw${i}kw3" placeholder="clearbit alternative" oninput="saveKw(${i})" value="${esc(c.kw3)}"></div>
-      </div>
-    </div>`).join('');
-
-  // Competitor alt rows
-  const ca = document.getElementById('compAltRows');
-  ca.innerHTML = D.compAlts.map((c,i) => `
-    <div style="display:grid;grid-template-columns:180px 1fr;gap:8px;margin-bottom:8px">
-      <input type="text" id="compAlt${i}domain" placeholder="zoominfo.com" oninput="saveCompAlt(${i})" value="${esc(c.domain)}">
-      <input type="text" id="compAlt${i}label" placeholder="ZoomInfo" oninput="saveCompAlt(${i})" value="${esc(c.label)}">
-    </div>`).join('');
-}
-
-function syncInputsToD() {
-  const fields = ['agencyName','agencyWebsite','agencyLogo','agencyColor','agencyBooking',
-    'agencyToolName','agencyToolLogo','agencyToolWebsite','agencyToolDesc',
-    'clientName','clientDomain','clientLogo','proposalDate','buyerType',
-    'slide01headline','slide01subline','slide03title','slide03subtitle',
-    'clientDR','clientKeywords','clientTraffic','clientRefDomains','slide04callout',
-    'aiScore','aiRank','aiCitations','aiChats','slide05callout',
-    'slide06callout','slide07subtitle','monthlyPrice','monthlyPrice2','tier1Label','tier2Label','tier1Total','tier2Total','cmsType','timelineM3','closingPara',
-    'slide08callout','slide09note','slide10headline','howItWorks1','howItWorks2','howItWorks3'];
-  fields.forEach(f => {
-    const el = document.getElementById(f);
-    if (el) el.value = D[f] || '';
-  });
-  // Set color inputs from D before updateColorPreview reads them back
-  const _ac = document.getElementById('agencyColor');
-  if(_ac) _ac.value = D.agencyColor || '#6366f1';
-  const _cc = document.getElementById('clientColor');
-  if(_cc) _cc.value = D.clientColor || '#0ea5e9';
-  updateColorPreview('agency');
-  updateColorPreview('client');
-  updateLogoPreview();
-  updateClientLogoPreview();
-}
-
-// ─────────────────────────────────────────────
-// SAVE / LOAD
-// ─────────────────────────────────────────────
-function save() {
-  const fields = ['agencyName','agencyWebsite','agencyLogo','agencyBooking',
-    'agencyToolName','agencyToolLogo','agencyToolWebsite','agencyToolDesc',
-    'clientName','clientDomain','clientLogo','proposalDate','buyerType',
-    'slide01headline','slide01subline','slide03title','slide03subtitle',
-    'clientDR','clientKeywords','clientTraffic','clientRefDomains','slide04callout',
-    'aiScore','aiRank','aiCitations','aiChats','slide05callout',
-    'slide06callout','slide07subtitle','monthlyPrice','monthlyPrice2','tier1Label','tier2Label','tier1Total','tier2Total','cmsType','timelineM3','closingPara',
-    'slide08callout','slide09note','slide10headline','howItWorks1','howItWorks2','howItWorks3'];
-  fields.forEach(f => { const el = document.getElementById(f); if(el) D[f] = el.value; });
-  const cc = document.getElementById('clientColor'); if(cc) D.clientColor = cc.value;
-  const ac = document.getElementById('agencyColor'); if(ac) D.agencyColor = ac.value;
-  try { localStorage.setItem('pb_data_' + PREFILL.clientName.toLowerCase().replace(/[^a-z0-9]/g,'_') + '_v4', JSON.stringify(D)); } catch(e){}
-}
-
-function loadFromStorage() {
-  try {
-    const s = localStorage.getItem('pb_data');
-    if(s) Object.assign(D, JSON.parse(s));
-  } catch(e){}
-}
-
-function saveGap(i) { D.gaps[i].title = document.getElementById(`gap${i}title`).value; D.gaps[i].body = document.getElementById(`gap${i}body`).value; save(); }
-function saveComp(i) { ['domain','dr','kw','traffic'].forEach(f => D.comps[i][f] = document.getElementById(`comp${i}${f}`).value); save(); }
-function savePrompt(i) { ['text','mentions','score','status'].forEach(f => D.prompts[i][f] = document.getElementById(`prompt${i}${f}`).value); save(); }
-function saveSource(i) { D.sources[i].domain = document.getElementById(`source${i}domain`).value; D.sources[i].mentions = document.getElementById(`source${i}mentions`).value; save(); }
-function saveKw(i) { ['title','kw1','kw2','kw3'].forEach(f => D.kwClusters[i][f] = document.getElementById(`kw${i}${f}`).value); save(); }
-function saveCompAlt(i) { D.compAlts[i].domain = document.getElementById(`compAlt${i}domain`).value; D.compAlts[i].label = document.getElementById(`compAlt${i}label`).value; save(); }
-
-// ─────────────────────────────────────────────
-// STEP NAV
-// ─────────────────────────────────────────────
-function renderStep(n) {
-  currentStep = n;
-  document.querySelectorAll('.step-content').forEach(el => el.classList.remove('active'));
-  document.querySelector(`.step-content[data-step="${n}"]`).classList.add('active');
-  document.querySelectorAll('.step-item').forEach((el,i) => {
-    el.classList.remove('active','done');
-    if(i === n) el.classList.add('active');
-    else if(i < n) el.classList.add('done');
-  });
-  document.getElementById('footerLeft').textContent = `Step ${n+1} of ${STEPS.length}`;
-  document.getElementById('btnBack').style.display = n === 0 ? 'none' : '';
-  document.getElementById('btnNext').textContent = n === STEPS.length-1 ? 'Generate' : 'Next →';
-  if(n === STEPS.length-1) buildSummary();
-}
-function goStep(n) { save(); renderStep(n); }
-function nextStep() { save(); if(currentStep < STEPS.length-1) renderStep(currentStep+1); else generateAndPreview(); }
-function prevStep() { save(); if(currentStep > 0) renderStep(currentStep-1); }
-
-// ─────────────────────────────────────────────
-// UI HELPERS
-// ─────────────────────────────────────────────
-function updateColorPreview(which) {
-  const el = document.getElementById(`${which}Color`);
-  if(!el) return;
-  const hex = el.value;
-  document.getElementById(`${which}ColorHex`).textContent = hex;
-  if(which === 'agency') D.agencyColor = hex; else D.clientColor = hex;
-}
-function setColor(which, hex) {
-  document.getElementById(`${which}Color`).value = hex;
-  updateColorPreview(which);
-  save();
-}
-function updateLogoPreview() {
-  const url = document.getElementById('agencyLogo').value;
-  const preview = document.getElementById('logoPreview');
-  const img = document.getElementById('logoImg');
-  if(url) { img.src = url; preview.style.display = 'flex'; }
-  else { preview.style.display = 'none'; }
-}
-function updateClientLogoPreview() {
-  const el = document.getElementById('clientLogo');
-  const preview = document.getElementById('clientLogoPreview');
-  const img = document.getElementById('clientLogoImg');
-  if(!el || !preview || !img) return;
-  if(el.value) { img.src = el.value; preview.style.display = 'block'; }
-  else { preview.style.display = 'none'; }
-}
-function handleLogoUpload(event) {
-  const file = event.target.files[0];
-  if(!file) return;
-  const reader = new FileReader();
-  reader.onload = function(e) {
-    D.agencyLogo = e.target.result;
-    document.getElementById('agencyLogo').value = e.target.result.substring(0,60) + '...';
-    updateLogoPreview();
-    document.getElementById('logoImg').src = e.target.result;
-    document.getElementById('logoPreview').style.display = 'flex';
-    save();
-  };
-  reader.readAsDataURL(file);
-}
-function esc(s) { return (s||'').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
-
-function buildSummary() {
-  const items = [
-    ['Agency', D.agencyName || '—'],
-    ['Client', D.clientName || '—'],
-    ['Domain', D.clientDomain || '—'],
-    ['Price', D.monthlyPrice || '—'],
-    ['Gaps filled', D.gaps.filter(g=>g.title).length + ' / ' + D.gaps.length],
-    ['Competitors', D.comps.filter(c=>c.domain).length + ' entered'],
-    ['Prompts', D.prompts.filter(p=>p.text).length + ' / 6'],
-    ['Keywords', D.kwClusters.filter(c=>c.title).length + ' clusters'],
-  ];
-  document.getElementById('summaryGrid').innerHTML = items.map(([k,v]) =>
-    `<div class="summary-item"><div class="k">${k}</div><div class="v">${v}</div></div>`).join('');
-}
-
-// ─────────────────────────────────────────────
-// COLOUR DERIVATION
-// ─────────────────────────────────────────────
-function hexToRgb(hex) {
-  const r = parseInt(hex.slice(1,3),16), g = parseInt(hex.slice(3,5),16), b = parseInt(hex.slice(5,7),16);
-  return {r,g,b};
-}
-function rgbToHex(r,g,b) {
-  return '#' + [r,g,b].map(x => Math.max(0,Math.min(255,Math.round(x))).toString(16).padStart(2,'0')).join('');
-}
-function deriveColors(hex) {
-  const {r,g,b} = hexToRgb(hex);
-  return {
-    accent: hex,
-    bg: rgbToHex(r*0.08+255*0.92, g*0.08+255*0.92, b*0.08+255*0.92),
-    bd: rgbToHex(r*0.28+255*0.72, g*0.28+255*0.72, b*0.28+255*0.72),
-    dark: rgbToHex(r*0.78, g*0.78, b*0.78),
-  };
-}
-
-// ─────────────────────────────────────────────
-// GENERATE
-// ─────────────────────────────────────────────
-function tok(s) { return String(s||''); }
-
-function fillTemplate() {
-  const ac = deriveColors(D.agencyColor);
-  const cc = deriveColors(D.clientColor);
-  const agencyLogo = D.agencyLogo && D.agencyLogo.length > 0 ? D.agencyLogo : '';
-  const agencyLogoHtml = agencyLogo
-    ? `<img src="${agencyLogo}" alt="${tok(D.agencyName)}" style="height:clamp(10px,1.4vh,14px);width:auto;opacity:.8">`
-    : `<span style="font-size:clamp(10px,1.3vh,13px);font-weight:700;color:var(--ink3)">${tok(D.agencyName)}</span>`;
-
-  const poweredByHtml = (num, total) => `
-    <div class="hdr-right">
-      <div class="snum">${String(num).padStart(2,'0')} / ${String(total).padStart(2,'0')}</div>
-      <a href="${tok(D.agencyWebsite)}" target="_blank" rel="noopener" class="powered">
-        <span>Powered by</span>${agencyLogoHtml}
-      </a>
-    </div>`;
-
-  const hdrHtml = (num, total) => `
-    <div class="hdr">
-      <div style="display:flex;align-items:center;gap:10px">
-        <img src="${tok(D.clientLogo)||'https://www.google.com/s2/favicons?domain='+tok(D.clientDomain)+'&sz=128'}" style="${D.clientLogo?'height:clamp(22px,3vh,36px);width:auto;max-width:120px;object-fit:contain':'border-radius:10px;width:clamp(26px,3.5vh,40px);height:clamp(26px,3.5vh,40px);object-fit:contain'}">
-        <span class="tag">SEO / AEO Proposal</span>
-      </div>
-      ${poweredByHtml(num,total)}
-    </div>`;
-
-  // Build gap cards HTML
-  const gapCards = D.gaps.filter(g=>g.title||g.body).map(g => `
-    <div style="background:var(--paper2);border:1px solid var(--rule);border-radius:10px;padding:clamp(14px,2vh,24px) clamp(16px,2vw,24px);display:flex;flex-direction:column;gap:clamp(8px,1.1vh,14px)">
-      <div style="font-size:clamp(15px,2.2vh,22px);font-weight:700;color:var(--ink)">${tok(g.title)}</div>
-      <div style="font-size:clamp(14px,1.9vh,18px);color:var(--ink2);line-height:1.6">${tok(g.body)}</div>
-    </div>`).join('');
-
-  // Build competitor rows
-  const compTableRows = [
-    `<div style="display:grid;grid-template-columns:2fr 60px 130px 130px 130px;gap:8px;padding:8px 0;border-bottom:2px solid var(--rule)">
-      <div class="col-head">Domain</div><div class="col-head">DR</div><div class="col-head">Keywords</div><div class="col-head">Traffic/mo</div><div class="col-head">Ref. Domains</div>
-    </div>`,
-    // Client row (highlighted)
-    D.clientDomain ? `<div style="display:grid;grid-template-columns:2fr 60px 130px 130px 130px;gap:8px;padding:10px 12px;border:2px solid var(--accent);border-radius:7px;margin:6px 0;background:var(--accent-bg)">
-      <div style="display:flex;align-items:center;gap:8px">
-        <img src="${tok(D.clientLogo)||'https://www.google.com/s2/favicons?domain='+tok(D.clientDomain)+'&sz=64'}" style="${D.clientLogo?'height:16px;width:auto;max-width:60px;object-fit:contain':'width:16px;height:16px;border-radius:3px'}">
-        <span style="font-size:clamp(14px,2vh,18px);font-weight:700;color:var(--accent)">${tok(D.clientName)} (You)</span>
-      </div>
-      <div style="font-size:clamp(14px,2vh,18px);font-weight:700;color:var(--ink)">${tok(D.clientDR)}</div>
-      <div style="font-size:clamp(14px,2vh,18px);color:var(--ink2)">${tok(D.clientKeywords)}</div>
-      <div style="font-size:clamp(14px,2vh,18px);color:var(--ink2)">${tok(D.clientTraffic)}</div>
-      <div style="font-size:clamp(14px,2vh,18px);color:var(--ink2)">${tok(D.clientRefDomains)}</div>
-    </div>` : '',
-    ...D.comps.filter(c=>c.domain).map(c => `
-    <div style="display:grid;grid-template-columns:2fr 60px 130px 130px 130px;gap:8px;padding:8px 0;border-bottom:1px solid var(--rule)">
-      <div style="display:flex;align-items:center;gap:8px">
-        <img src="https://www.google.com/s2/favicons?domain=${tok(c.domain)}&sz=64" style="width:16px;height:16px;border-radius:3px">
-        <span style="font-size:clamp(14px,2vh,18px);color:var(--ink2)">${tok(c.domain)}</span>
-      </div>
-      <div style="font-size:clamp(14px,2vh,18px);color:var(--ink2)">${tok(c.dr)}</div>
-      <div style="font-size:clamp(14px,2vh,18px);color:var(--ink2)">${tok(c.kw)}</div>
-      <div style="font-size:clamp(14px,2vh,18px);color:var(--ink2)">${tok(c.traffic)}</div>
-      <div style="font-size:clamp(14px,2vh,18px);color:var(--ink2)">—</div>
-    </div>`)
-  ].join('');
-
-  // Build prompt rows
-  const promptRows = D.prompts.filter(p=>p.text).map(p => {
-    const cls = p.status === 'ok' ? 'ok' : p.status === 'warn' ? 'warn' : 'red';
-    return `<div style="display:grid;grid-template-columns:1fr 80px 80px 100px;gap:8px;padding:8px 10px;border-radius:6px;background:var(--paper2);margin-bottom:6px;border:1px solid var(--rule)">
-      <div style="font-size:clamp(13px,1.8vh,17px);color:var(--ink2)">${tok(p.text)}</div>
-      <div style="font-size:clamp(13px,1.8vh,17px);color:var(--ink3);text-align:center">${tok(p.mentions)}</div>
-      <div style="font-size:clamp(13px,1.8vh,17px);color:var(--ink3);text-align:center">${tok(p.score)}</div>
-      <div style="background:var(--${cls}-bg);border:1px solid var(--${cls}-bd);border-radius:4px;padding:2px 8px;font-size:clamp(11px,1.4vh,13px);font-weight:700;color:var(--${cls});text-align:center;white-space:nowrap">
-        ${cls==='ok'?'Appearing':cls==='warn'?'Weak':'Not found'}
-      </div>
-    </div>`;
-  }).join('');
-
-  // Build source rows
-  const sourceRows = D.sources.filter(s=>s.domain).map(s => `
-    <div style="display:flex;align-items:center;justify-content:space-between;padding:7px 10px;border-radius:6px;background:var(--paper2);border:1px solid var(--rule);margin-bottom:5px">
-      <div style="display:flex;align-items:center;gap:8px">
-        <img src="https://www.google.com/s2/favicons?domain=${tok(s.domain)}&sz=32" style="width:14px;height:14px;border-radius:2px">
-        <span style="font-size:clamp(13px,1.8vh,17px);color:var(--ink2)">${tok(s.domain)}</span>
-      </div>
-      <span style="font-size:clamp(12px,1.6vh,15px);color:var(--ink4)">${tok(s.mentions)}</span>
-    </div>`).join('');
-
-  // Build kw clusters
-  const kwHtml = D.kwClusters.filter(c=>c.title).map(c => `
-    <div style="background:var(--paper2);border:1px solid var(--rule);border-radius:8px;padding:clamp(14px,1.8vh,20px)">
-      <div style="font-size:clamp(12px,1.5vh,15px);font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--ink4);margin-bottom:10px">${tok(c.title)}</div>
-      ${[c.kw1,c.kw2,c.kw3].filter(Boolean).map(kw=>`
-      <div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--rule)">
-        <span style="width:6px;height:6px;border-radius:50%;background:var(--accent);flex-shrink:0;display:inline-block"></span>
-        <span style="font-size:clamp(14px,1.9vh,18px);color:var(--ink2)">${tok(kw)}</span>
-      </div>`).join('')}
-    </div>`).join('');
-
-  // Build comp alt rows for slide 7
-  const compAltsHtml = D.compAlts.filter(c=>c.domain).map(c => `
-    <div style="display:flex;align-items:center;gap:10px;padding:clamp(8px,1.2vh,13px) 0;border-bottom:1px solid var(--rule)">
-      <img src="https://www.google.com/s2/favicons?domain=${tok(c.domain)}&sz=64" style="width:20px;height:20px;border-radius:4px;flex-shrink:0">
-      <span style="font-size:clamp(14px,2vh,19px);font-weight:600;color:var(--ink)">${tok(c.label)||tok(c.domain)}</span>
-    </div>`).join('');
-
-  const compAltContentHtml = D.compAlts.filter(c=>c.domain).map(c => `
-    <div style="display:flex;align-items:flex-start;gap:10px;padding:clamp(8px,1.2vh,13px) 0;border-bottom:1px solid var(--accent-bd)">
-      <img src="https://www.google.com/s2/favicons?domain=${tok(c.domain)}&sz=64" style="width:16px;height:16px;border-radius:3px;flex-shrink:0;margin-top:2px">
-      <span style="font-size:clamp(14px,1.9vh,18px);color:var(--ink);font-weight:500;line-height:1.3">
-        Best ${tok(c.label||c.domain)} Alternatives for ${tok(D.buyerType||'your buyers')}
-      </span>
-    </div>`).join('');
-
-  // Tool section for slide 10
-  const toolLogo = D.agencyToolLogo || D.agencyLogo || '';
-  const toolLogoHtml = toolLogo
-    ? `<img src="${toolLogo}" style="width:clamp(32px,4.5vh,46px);height:clamp(32px,4.5vh,46px);border-radius:8px;margin-bottom:clamp(10px,1.4vh,16px);display:block;object-fit:contain">`
-    : `<div style="width:clamp(32px,4.5vh,46px);height:clamp(32px,4.5vh,46px);border-radius:8px;background:var(--accent-bg);border:1px solid var(--accent-bd);margin-bottom:clamp(10px,1.4vh,16px);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--accent)">${(D.agencyToolName||D.agencyName||'AI').substring(0,3).toUpperCase()}</div>`;
-
-  const n = 12; // total slides
-
-  return `<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>${tok(D.clientName)} SEO/AEO Proposal</title>
+<title>Hockey Stickman SEO/AEO Proposal</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.1.0/reveal.min.css">
 <style>
   :root {
-    --accent: ${cc.accent};
-    --accent-bg: ${cc.bg};
-    --accent-bd: ${cc.bd};
-    --accent-dark: ${cc.dark};
+    --accent: #CC1F1F;
+    --accent-bg: #fbeded;
+    --accent-bd: #f1c0c0;
+    --accent-dark: #9f1818;
     --ink: #171C33; --ink2: #3D4461; --ink3: #717185; --ink4: #A1A1B5;
     --paper: #fff; --paper2: #F9FAFB; --paper3: #F3F4F6; --rule: #E5E7EB;
     --ok: #16a34a; --ok-bg: #f0fdf4; --ok-bd: #bbf7d0;
@@ -1013,27 +47,40 @@ function fillTemplate() {
 <section><div class="s" style="justify-content:center;gap:clamp(16px,2.5vh,32px)">
 <div class="stripe"></div>
 <div style="display:flex;align-items:center;gap:12px">
-  <img src="${tok(D.clientLogo)||'https://www.google.com/s2/favicons?domain='+tok(D.clientDomain)+'&sz=128'}" style="${D.clientLogo?'height:clamp(30px,4vh,48px);width:auto;max-width:140px;object-fit:contain':'border-radius:12px;width:clamp(36px,5vh,54px);height:clamp(36px,5vh,54px);object-fit:contain'}">
+  <img src="https://www.google.com/s2/favicons?domain=hockeystickman.ca&sz=128" style="border-radius:12px;width:clamp(36px,5vh,54px);height:clamp(36px,5vh,54px);object-fit:contain">
   <span class="tag">SEO / AEO Proposal</span>
 </div>
 <div>
-  <h2 style="font-size:clamp(28px,5.5vh,62px);margin-bottom:clamp(10px,1.5vh,18px)">${tok(D.slide01headline)||`How ${tok(D.clientName)} Can Own AI Search in Its Category`}</h2>
-  <p style="font-size:clamp(16px,2.4vh,26px);color:var(--ink2);line-height:1.5;margin:0;font-weight:400;max-width:75ch">${tok(D.slide01subline)||`You have the right product. The gap is visibility. Here is how to change that.`}</p>
+  <h2 style="font-size:clamp(28px,5.5vh,62px);margin-bottom:clamp(10px,1.5vh,18px)">290 articles. 15 years of expertise. AI sends hockey shoppers to Reddit instead.</h2>
+  <p style="font-size:clamp(16px,2.4vh,26px);color:var(--ink2);line-height:1.5;margin:0;font-weight:400;max-width:75ch">Hockey Stickman ranks #1 for AI visibility in hockey retail — above Bauer and CCM. Here is what that means, and what to do next.</p>
 </div>
 <div style="display:flex;align-items:center;gap:clamp(16px,2vw,28px);margin-top:clamp(8px,1.5vh,20px)">
-  <a href="${tok(D.agencyWebsite)}" target="_blank" rel="noopener" style="display:flex;align-items:center;gap:8px;text-decoration:none">
+  <a href="https://growthautomated.ai" target="_blank" rel="noopener" style="display:flex;align-items:center;gap:8px;text-decoration:none">
     <span style="font-size:clamp(10px,1.3vh,14px);color:var(--ink4)">Powered by</span>
-    ${agencyLogoHtml}
+    <img src="https://cdn.shopify.com/s/files/1/0813/6707/3081/files/Color_logo_-_no_background_1f36d52b-3764-407f-930c-151eb23683f7.png?v=1740765450" alt="Growth Automated" style="height:clamp(10px,1.4vh,14px);width:auto;opacity:.8">
   </a>
   <span style="color:var(--rule)">|</span>
-  <span style="font-size:clamp(10px,1.3vh,14px);color:var(--ink4)">Prepared for ${tok(D.clientName)} &middot; ${tok(D.proposalDate)||'2026'}</span>
+  <span style="font-size:clamp(10px,1.3vh,14px);color:var(--ink4)">Prepared for Hockey Stickman &middot; June 2026</span>
 </div>
 </div></section>
 
 <!-- SLIDE 02: Why SEO & AEO -->
 <section><div class="s">
 <div class="stripe"></div>
-${hdrHtml(2,n)}
+
+    <div class="hdr">
+      <div style="display:flex;align-items:center;gap:10px">
+        <img src="https://www.google.com/s2/favicons?domain=hockeystickman.ca&sz=128" style="border-radius:10px;width:clamp(26px,3.5vh,40px);height:clamp(26px,3.5vh,40px);object-fit:contain">
+        <span class="tag">SEO / AEO Proposal</span>
+      </div>
+      
+    <div class="hdr-right">
+      <div class="snum">02 / 12</div>
+      <a href="https://growthautomated.ai" target="_blank" rel="noopener" class="powered">
+        <span>Powered by</span><img src="https://cdn.shopify.com/s/files/1/0813/6707/3081/files/Color_logo_-_no_background_1f36d52b-3764-407f-930c-151eb23683f7.png?v=1740765450" alt="Growth Automated" style="height:clamp(10px,1.4vh,14px);width:auto;opacity:.8">
+      </a>
+    </div>
+    </div>
 <div class="divider"></div>
 <h2 style="margin-top:1vh">Why Invest in <span style="color:var(--accent)">SEO &amp; AEO Now</span></h2>
 <div class="rg2" style="gap:clamp(12px,2vw,24px);flex:1;min-height:0;align-items:start">
@@ -1058,50 +105,241 @@ ${hdrHtml(2,n)}
 <!-- SLIDE 03: Gaps -->
 <section><div class="s">
 <div class="stripe"></div>
-${hdrHtml(3,n)}
+
+    <div class="hdr">
+      <div style="display:flex;align-items:center;gap:10px">
+        <img src="https://www.google.com/s2/favicons?domain=hockeystickman.ca&sz=128" style="border-radius:10px;width:clamp(26px,3.5vh,40px);height:clamp(26px,3.5vh,40px);object-fit:contain">
+        <span class="tag">SEO / AEO Proposal</span>
+      </div>
+      
+    <div class="hdr-right">
+      <div class="snum">03 / 12</div>
+      <a href="https://growthautomated.ai" target="_blank" rel="noopener" class="powered">
+        <span>Powered by</span><img src="https://cdn.shopify.com/s/files/1/0813/6707/3081/files/Color_logo_-_no_background_1f36d52b-3764-407f-930c-151eb23683f7.png?v=1740765450" alt="Growth Automated" style="height:clamp(10px,1.4vh,14px);width:auto;opacity:.8">
+      </a>
+    </div>
+    </div>
 <div class="divider"></div>
-<h2 style="margin-top:1vh">${tok(D.slide03title)||`Why ${tok(D.clientName)} Is Invisible in AI Search Today`}</h2>
-<p style="font-size:clamp(15px,2.1vh,21px);color:var(--ink2);line-height:1.5;margin:0 0 clamp(14px,2vh,22px);font-weight:500">${tok(D.slide03subtitle)||'These are the structural gaps keeping you out of AI answers.'}</p>
+<h2 style="margin-top:1vh">AI models don't know Hockey Stickman exists</h2>
+<p style="font-size:clamp(15px,2.1vh,21px);color:var(--ink2);line-height:1.5;margin:0 0 clamp(14px,2vh,22px);font-weight:500">On 8 of 10 buying queries, your brand earns zero AI mentions. Reddit (42 citations), prostockhockey.com (40), and YouTube (38) own the category. The opportunity is wide open — and you are already leading your competitors.</p>
 <div class="rg2" style="gap:clamp(10px,1.4vw,16px);flex:1;min-height:0">
-${gapCards || `
-  <div class="obox"><div style="font-size:clamp(15px,2.2vh,22px);font-weight:700;color:var(--ink);margin-bottom:8px">No AI Citation Presence</div><div style="font-size:clamp(14px,1.9vh,18px);color:var(--ink2);line-height:1.6">Fill in your gap cards in the builder to see them here.</div></div>
-  <div class="obox"><div style="font-size:clamp(15px,2.2vh,22px);font-weight:700;color:var(--ink);margin-bottom:8px">Thin Content Coverage</div><div style="font-size:clamp(14px,1.9vh,18px);color:var(--ink2);line-height:1.6">Add your specific gaps to make this slide powerful.</div></div>`}
+
+    <div style="background:var(--paper2);border:1px solid var(--rule);border-radius:10px;padding:clamp(14px,2vh,24px) clamp(16px,2vw,24px);display:flex;flex-direction:column;gap:clamp(8px,1.1vh,14px)">
+      <div style="font-size:clamp(15px,2.2vh,22px);font-weight:700;color:var(--ink)">llms.txt describes checkout, not expertise</div>
+      <div style="font-size:clamp(14px,1.9vh,18px);color:var(--ink2);line-height:1.6">Your llms.txt exists but only documents Shopify's commerce protocol — cart creation, checkout flow, agent purchasing. AI reads this and classifies you as a store, not a knowledge source. No mention of your 290 articles, Pro Blackout™ line, or 15 years of pro stock expertise.</div>
+    </div>
+    <div style="background:var(--paper2);border:1px solid var(--rule);border-radius:10px;padding:clamp(14px,2vh,24px) clamp(16px,2vw,24px);display:flex;flex-direction:column;gap:clamp(8px,1.1vh,14px)">
+      <div style="font-size:clamp(15px,2.2vh,22px);font-weight:700;color:var(--ink)">290 articles — no hub page AI can cite</div>
+      <div style="font-size:clamp(14px,1.9vh,18px);color:var(--ink2);line-height:1.6">You've written about flex ratings, stick length, composite vs wood, defenseman sticks — exactly the queries where you score zero. The content is scattered across 290 blog posts. AI prefers one consolidated FAQ-structured authority page over a blog archive.</div>
+    </div>
+    <div style="background:var(--paper2);border:1px solid var(--rule);border-radius:10px;padding:clamp(14px,2vh,24px) clamp(16px,2vw,24px);display:flex;flex-direction:column;gap:clamp(8px,1.1vh,14px)">
+      <div style="font-size:clamp(15px,2.2vh,22px);font-weight:700;color:var(--ink)">US site earns 5x more AI citations than .ca</div>
+      <div style="font-size:clamp(14px,1.9vh,18px);color:var(--ink2);line-height:1.6">hockeystickman.com earns 5 AI citations (Google AIO + Gemini). hockeystickman.ca earns zero. Your Canadian shoppers are being directed to American sources while your own .com domain captures some US traffic.</div>
+    </div>
 </div>
 </div></section>
 
 <!-- SLIDE 04: SEO Today -->
 <section><div class="s">
 <div class="stripe"></div>
-${hdrHtml(4,n)}
+
+    <div class="hdr">
+      <div style="display:flex;align-items:center;gap:10px">
+        <img src="https://www.google.com/s2/favicons?domain=hockeystickman.ca&sz=128" style="border-radius:10px;width:clamp(26px,3.5vh,40px);height:clamp(26px,3.5vh,40px);object-fit:contain">
+        <span class="tag">SEO / AEO Proposal</span>
+      </div>
+      
+    <div class="hdr-right">
+      <div class="snum">04 / 12</div>
+      <a href="https://growthautomated.ai" target="_blank" rel="noopener" class="powered">
+        <span>Powered by</span><img src="https://cdn.shopify.com/s/files/1/0813/6707/3081/files/Color_logo_-_no_background_1f36d52b-3764-407f-930c-151eb23683f7.png?v=1740765450" alt="Growth Automated" style="height:clamp(10px,1.4vh,14px);width:auto;opacity:.8">
+      </a>
+    </div>
+    </div>
 <div class="divider"></div>
-<h2 style="margin-top:1vh"><span style="color:var(--accent)">${tok(D.clientName)}</span> in Search Today</h2>
+<h2 style="margin-top:1vh"><span style="color:var(--accent)">Hockey Stickman</span> in Search Today</h2>
 <div style="flex:1;min-height:0;overflow-y:auto;margin-bottom:clamp(8px,1.2vh,14px)">
-  ${compTableRows}
+  <div style="display:grid;grid-template-columns:2fr 60px 130px 130px 130px;gap:8px;padding:8px 0;border-bottom:2px solid var(--rule)">
+      <div class="col-head">Domain</div><div class="col-head">DR</div><div class="col-head">Keywords</div><div class="col-head">Traffic/mo</div><div class="col-head">Ref. Domains</div>
+    </div><div style="display:grid;grid-template-columns:2fr 60px 130px 130px 130px;gap:8px;padding:10px 12px;border:2px solid var(--accent);border-radius:7px;margin:6px 0;background:var(--accent-bg)">
+      <div style="display:flex;align-items:center;gap:8px">
+        <img src="https://www.google.com/s2/favicons?domain=hockeystickman.ca&sz=64" style="width:16px;height:16px;border-radius:3px">
+        <span style="font-size:clamp(14px,2vh,18px);font-weight:700;color:var(--accent)">Hockey Stickman (You)</span>
+      </div>
+      <div style="font-size:clamp(14px,2vh,18px);font-weight:700;color:var(--ink)">—</div>
+      <div style="font-size:clamp(14px,2vh,18px);color:var(--ink2)">hockey sticks, pro stock hockey sticks, hockey equipment Canada</div>
+      <div style="font-size:clamp(14px,2vh,18px);color:var(--ink2)">—</div>
+      <div style="font-size:clamp(14px,2vh,18px);color:var(--ink2)">—</div>
+    </div>
+    <div style="display:grid;grid-template-columns:2fr 60px 130px 130px 130px;gap:8px;padding:8px 0;border-bottom:1px solid var(--rule)">
+      <div style="display:flex;align-items:center;gap:8px">
+        <img src="https://www.google.com/s2/favicons?domain=bauerhockey.org&sz=64" style="width:16px;height:16px;border-radius:3px">
+        <span style="font-size:clamp(14px,2vh,18px);color:var(--ink2)">bauerhockey.org</span>
+      </div>
+      <div style="font-size:clamp(14px,2vh,18px);color:var(--ink2)">—</div>
+      <div style="font-size:clamp(14px,2vh,18px);color:var(--ink2)">—</div>
+      <div style="font-size:clamp(14px,2vh,18px);color:var(--ink2)">—</div>
+      <div style="font-size:clamp(14px,2vh,18px);color:var(--ink2)">—</div>
+    </div>
+    <div style="display:grid;grid-template-columns:2fr 60px 130px 130px 130px;gap:8px;padding:8px 0;border-bottom:1px solid var(--rule)">
+      <div style="display:flex;align-items:center;gap:8px">
+        <img src="https://www.google.com/s2/favicons?domain=ccmhockey.com&sz=64" style="width:16px;height:16px;border-radius:3px">
+        <span style="font-size:clamp(14px,2vh,18px);color:var(--ink2)">ccmhockey.com</span>
+      </div>
+      <div style="font-size:clamp(14px,2vh,18px);color:var(--ink2)">—</div>
+      <div style="font-size:clamp(14px,2vh,18px);color:var(--ink2)">—</div>
+      <div style="font-size:clamp(14px,2vh,18px);color:var(--ink2)">204,499</div>
+      <div style="font-size:clamp(14px,2vh,18px);color:var(--ink2)">—</div>
+    </div>
+    <div style="display:grid;grid-template-columns:2fr 60px 130px 130px 130px;gap:8px;padding:8px 0;border-bottom:1px solid var(--rule)">
+      <div style="display:flex;align-items:center;gap:8px">
+        <img src="https://www.google.com/s2/favicons?domain=hockeyshot.com&sz=64" style="width:16px;height:16px;border-radius:3px">
+        <span style="font-size:clamp(14px,2vh,18px);color:var(--ink2)">hockeyshot.com</span>
+      </div>
+      <div style="font-size:clamp(14px,2vh,18px);color:var(--ink2)">—</div>
+      <div style="font-size:clamp(14px,2vh,18px);color:var(--ink2)">—</div>
+      <div style="font-size:clamp(14px,2vh,18px);color:var(--ink2)">19,437</div>
+      <div style="font-size:clamp(14px,2vh,18px);color:var(--ink2)">—</div>
+    </div>
+    <div style="display:grid;grid-template-columns:2fr 60px 130px 130px 130px;gap:8px;padding:8px 0;border-bottom:1px solid var(--rule)">
+      <div style="display:flex;align-items:center;gap:8px">
+        <img src="https://www.google.com/s2/favicons?domain=howieshockeytape.com&sz=64" style="width:16px;height:16px;border-radius:3px">
+        <span style="font-size:clamp(14px,2vh,18px);color:var(--ink2)">howieshockeytape.com</span>
+      </div>
+      <div style="font-size:clamp(14px,2vh,18px);color:var(--ink2)">—</div>
+      <div style="font-size:clamp(14px,2vh,18px);color:var(--ink2)">—</div>
+      <div style="font-size:clamp(14px,2vh,18px);color:var(--ink2)">35,115</div>
+      <div style="font-size:clamp(14px,2vh,18px);color:var(--ink2)">—</div>
+    </div>
 </div>
-${D.slide04callout ? `<div style="padding:clamp(8px,1.1vh,12px) clamp(14px,1.8vw,20px);background:var(--accent-bg);border:1px solid var(--accent-bd);border-radius:6px;font-size:clamp(13px,1.8vh,17px);color:var(--accent-dark);font-weight:500">${tok(D.slide04callout)}</div>` : ''}
+<div style="padding:clamp(8px,1.1vh,12px) clamp(14px,1.8vw,20px);background:var(--accent-bg);border:1px solid var(--accent-bd);border-radius:6px;font-size:clamp(13px,1.8vh,17px);color:var(--accent-dark);font-weight:500">Bauer scores 4/100. CCM scores 2/100. HockeyShot and Howies score 0. The entire hockey retail category is invisible to AI — and Hockey Stickman is already ranked first among all of them.</div>
 </div></section>
 
 <!-- SLIDE 05: AI Today -->
 <section><div class="s">
 <div class="stripe"></div>
-${hdrHtml(5,n)}
+
+    <div class="hdr">
+      <div style="display:flex;align-items:center;gap:10px">
+        <img src="https://www.google.com/s2/favicons?domain=hockeystickman.ca&sz=128" style="border-radius:10px;width:clamp(26px,3.5vh,40px);height:clamp(26px,3.5vh,40px);object-fit:contain">
+        <span class="tag">SEO / AEO Proposal</span>
+      </div>
+      
+    <div class="hdr-right">
+      <div class="snum">05 / 12</div>
+      <a href="https://growthautomated.ai" target="_blank" rel="noopener" class="powered">
+        <span>Powered by</span><img src="https://cdn.shopify.com/s/files/1/0813/6707/3081/files/Color_logo_-_no_background_1f36d52b-3764-407f-930c-151eb23683f7.png?v=1740765450" alt="Growth Automated" style="height:clamp(10px,1.4vh,14px);width:auto;opacity:.8">
+      </a>
+    </div>
+    </div>
 <div class="divider"></div>
-<h2 style="margin-top:1vh"><span style="color:var(--accent)">${tok(D.clientName)}</span> in AI Search Today</h2>
+<h2 style="margin-top:1vh"><span style="color:var(--accent)">Hockey Stickman</span> in AI Search Today</h2>
 <div style="display:flex;gap:clamp(10px,1.5vw,18px);margin-bottom:clamp(10px,1.4vh,16px);flex-shrink:0">
-  <div class="obox" style="flex:1;text-align:center"><div style="font-size:clamp(24px,4vh,42px);font-weight:700;color:var(--accent);font-family:'DM Mono',monospace">${tok(D.aiScore)||'—'}</div><div style="font-size:clamp(11px,1.4vh,14px);color:var(--ink4);margin-top:4px">AI Score</div></div>
-  <div class="obox" style="flex:1;text-align:center"><div style="font-size:clamp(16px,2.8vh,28px);font-weight:700;color:var(--ink);font-family:'DM Mono',monospace">${tok(D.aiRank)||'—'}</div><div style="font-size:clamp(11px,1.4vh,14px);color:var(--ink4);margin-top:4px">Rank in Category</div></div>
-  <div class="obox" style="flex:1;text-align:center"><div style="font-size:clamp(24px,4vh,42px);font-weight:700;color:var(--ink);font-family:'DM Mono',monospace">${tok(D.aiCitations)||'—'}</div><div style="font-size:clamp(11px,1.4vh,14px);color:var(--ink4);margin-top:4px">Citations Found</div></div>
-  <div class="obox" style="flex:1;text-align:center"><div style="font-size:clamp(24px,4vh,42px);font-weight:700;color:var(--ink);font-family:'DM Mono',monospace">${tok(D.aiChats)||'—'}</div><div style="font-size:clamp(11px,1.4vh,14px);color:var(--ink4);margin-top:4px">Monthly AI Searches</div></div>
+  <div class="obox" style="flex:1;text-align:center"><div style="font-size:clamp(24px,4vh,42px);font-weight:700;color:var(--accent);font-family:'DM Mono',monospace">5</div><div style="font-size:clamp(11px,1.4vh,14px);color:var(--ink4);margin-top:4px">AI Score</div></div>
+  <div class="obox" style="flex:1;text-align:center"><div style="font-size:clamp(16px,2.8vh,28px);font-weight:700;color:var(--ink);font-family:'DM Mono',monospace">#1 of 5 tracked brands</div><div style="font-size:clamp(11px,1.4vh,14px);color:var(--ink4);margin-top:4px">Rank in Category</div></div>
+  <div class="obox" style="flex:1;text-align:center"><div style="font-size:clamp(24px,4vh,42px);font-weight:700;color:var(--ink);font-family:'DM Mono',monospace">5 (.com only)</div><div style="font-size:clamp(11px,1.4vh,14px);color:var(--ink4);margin-top:4px">Citations Found</div></div>
+  <div class="obox" style="flex:1;text-align:center"><div style="font-size:clamp(24px,4vh,42px);font-weight:700;color:var(--ink);font-family:'DM Mono',monospace">10 prompts tracked</div><div style="font-size:clamp(11px,1.4vh,14px);color:var(--ink4);margin-top:4px">Monthly AI Searches</div></div>
 </div>
 <div class="rg2" style="gap:clamp(10px,1.5vw,16px);flex:1;min-height:0">
   <div>
     <div class="col-head" style="margin-bottom:8px">Prompts analysed</div>
-    ${promptRows || '<p style="color:var(--ink4);font-size:14px">Add prompts in the builder.</p>'}
+    <div style="display:grid;grid-template-columns:1fr 80px 80px 100px;gap:8px;padding:8px 10px;border-radius:6px;background:var(--paper2);margin-bottom:6px;border:1px solid var(--rule)">
+      <div style="font-size:clamp(13px,1.8vh,17px);color:var(--ink2)">Best hockey sticks for advanced players in 2026?</div>
+      <div style="font-size:clamp(13px,1.8vh,17px);color:var(--ink3);text-align:center">0</div>
+      <div style="font-size:clamp(13px,1.8vh,17px);color:var(--ink3);text-align:center">0</div>
+      <div style="background:var(--red-bg);border:1px solid var(--red-bd);border-radius:4px;padding:2px 8px;font-size:clamp(11px,1.4vh,13px);font-weight:700;color:var(--red);text-align:center;white-space:nowrap">
+        Not found
+      </div>
+    </div><div style="display:grid;grid-template-columns:1fr 80px 80px 100px;gap:8px;padding:8px 10px;border-radius:6px;background:var(--paper2);margin-bottom:6px;border:1px solid var(--rule)">
+      <div style="font-size:clamp(13px,1.8vh,17px);color:var(--ink2)">Do stick flex ratings really matter for casual players?</div>
+      <div style="font-size:clamp(13px,1.8vh,17px);color:var(--ink3);text-align:center">0</div>
+      <div style="font-size:clamp(13px,1.8vh,17px);color:var(--ink3);text-align:center">0</div>
+      <div style="background:var(--red-bg);border:1px solid var(--red-bd);border-radius:4px;padding:2px 8px;font-size:clamp(11px,1.4vh,13px);font-weight:700;color:var(--red);text-align:center;white-space:nowrap">
+        Not found
+      </div>
+    </div><div style="display:grid;grid-template-columns:1fr 80px 80px 100px;gap:8px;padding:8px 10px;border-radius:6px;background:var(--paper2);margin-bottom:6px;border:1px solid var(--rule)">
+      <div style="font-size:clamp(13px,1.8vh,17px);color:var(--ink2)">How do I figure out the right stick length as a beginner?</div>
+      <div style="font-size:clamp(13px,1.8vh,17px);color:var(--ink3);text-align:center">0</div>
+      <div style="font-size:clamp(13px,1.8vh,17px);color:var(--ink3);text-align:center">0</div>
+      <div style="background:var(--red-bg);border:1px solid var(--red-bd);border-radius:4px;padding:2px 8px;font-size:clamp(11px,1.4vh,13px);font-weight:700;color:var(--red);text-align:center;white-space:nowrap">
+        Not found
+      </div>
+    </div><div style="display:grid;grid-template-columns:1fr 80px 80px 100px;gap:8px;padding:8px 10px;border-radius:6px;background:var(--paper2);margin-bottom:6px;border:1px solid var(--rule)">
+      <div style="font-size:clamp(13px,1.8vh,17px);color:var(--ink2)">Composite vs wooden hockey sticks for intermediate players?</div>
+      <div style="font-size:clamp(13px,1.8vh,17px);color:var(--ink3);text-align:center">0</div>
+      <div style="font-size:clamp(13px,1.8vh,17px);color:var(--ink3);text-align:center">0</div>
+      <div style="background:var(--red-bg);border:1px solid var(--red-bd);border-radius:4px;padding:2px 8px;font-size:clamp(11px,1.4vh,13px);font-weight:700;color:var(--red);text-align:center;white-space:nowrap">
+        Not found
+      </div>
+    </div><div style="display:grid;grid-template-columns:1fr 80px 80px 100px;gap:8px;padding:8px 10px;border-radius:6px;background:var(--paper2);margin-bottom:6px;border:1px solid var(--rule)">
+      <div style="font-size:clamp(13px,1.8vh,17px);color:var(--ink2)">Our rec league needs affordable hockey sticks — options under budget?</div>
+      <div style="font-size:clamp(13px,1.8vh,17px);color:var(--ink3);text-align:center">2</div>
+      <div style="font-size:clamp(13px,1.8vh,17px);color:var(--ink3);text-align:center">28</div>
+      <div style="background:var(--red-bg);border:1px solid var(--red-bd);border-radius:4px;padding:2px 8px;font-size:clamp(11px,1.4vh,13px);font-weight:700;color:var(--red);text-align:center;white-space:nowrap">
+        Not found
+      </div>
+    </div><div style="display:grid;grid-template-columns:1fr 80px 80px 100px;gap:8px;padding:8px 10px;border-radius:6px;background:var(--paper2);margin-bottom:6px;border:1px solid var(--rule)">
+      <div style="font-size:clamp(13px,1.8vh,17px);color:var(--ink2)">Top-rated hockey sticks for defensemen — what's worth the hype?</div>
+      <div style="font-size:clamp(13px,1.8vh,17px);color:var(--ink3);text-align:center">0</div>
+      <div style="font-size:clamp(13px,1.8vh,17px);color:var(--ink3);text-align:center">0</div>
+      <div style="background:var(--red-bg);border:1px solid var(--red-bd);border-radius:4px;padding:2px 8px;font-size:clamp(11px,1.4vh,13px);font-weight:700;color:var(--red);text-align:center;white-space:nowrap">
+        Not found
+      </div>
+    </div><div style="display:grid;grid-template-columns:1fr 80px 80px 100px;gap:8px;padding:8px 10px;border-radius:6px;background:var(--paper2);margin-bottom:6px;border:1px solid var(--rule)">
+      <div style="font-size:clamp(13px,1.8vh,17px);color:var(--ink2)">What hockey sticks are youth coaches recommending for beginners?</div>
+      <div style="font-size:clamp(13px,1.8vh,17px);color:var(--ink3);text-align:center">0</div>
+      <div style="font-size:clamp(13px,1.8vh,17px);color:var(--ink3);text-align:center">0</div>
+      <div style="background:var(--red-bg);border:1px solid var(--red-bd);border-radius:4px;padding:2px 8px;font-size:clamp(11px,1.4vh,13px);font-weight:700;color:var(--red);text-align:center;white-space:nowrap">
+        Not found
+      </div>
+    </div><div style="display:grid;grid-template-columns:1fr 80px 80px 100px;gap:8px;padding:8px 10px;border-radius:6px;background:var(--paper2);margin-bottom:6px;border:1px solid var(--rule)">
+      <div style="font-size:clamp(13px,1.8vh,17px);color:var(--ink2)">What's the proper way to tape a hockey stick blade, and why?</div>
+      <div style="font-size:clamp(13px,1.8vh,17px);color:var(--ink3);text-align:center">2</div>
+      <div style="font-size:clamp(13px,1.8vh,17px);color:var(--ink3);text-align:center">25</div>
+      <div style="background:var(--red-bg);border:1px solid var(--red-bd);border-radius:4px;padding:2px 8px;font-size:clamp(11px,1.4vh,13px);font-weight:700;color:var(--red);text-align:center;white-space:nowrap">
+        Not found
+      </div>
+    </div>
   </div>
   <div>
     <div class="col-head" style="margin-bottom:8px">Top cited sources instead of you</div>
-    ${sourceRows || '<p style="color:var(--ink4);font-size:14px">Add sources in the builder.</p>'}
-    ${D.slide05callout ? `<div style="margin-top:10px;padding:10px 14px;background:var(--accent-bg);border:1px solid var(--accent-bd);border-radius:6px;font-size:clamp(13px,1.8vh,16px);color:var(--accent-dark)">${tok(D.slide05callout)}</div>` : ''}
+    
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:7px 10px;border-radius:6px;background:var(--paper2);border:1px solid var(--rule);margin-bottom:5px">
+      <div style="display:flex;align-items:center;gap:8px">
+        <img src="https://www.google.com/s2/favicons?domain=reddit.com&sz=32" style="width:14px;height:14px;border-radius:2px">
+        <span style="font-size:clamp(13px,1.8vh,17px);color:var(--ink2)">reddit.com</span>
+      </div>
+      <span style="font-size:clamp(12px,1.6vh,15px);color:var(--ink4)">42</span>
+    </div>
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:7px 10px;border-radius:6px;background:var(--paper2);border:1px solid var(--rule);margin-bottom:5px">
+      <div style="display:flex;align-items:center;gap:8px">
+        <img src="https://www.google.com/s2/favicons?domain=prostockhockey.com&sz=32" style="width:14px;height:14px;border-radius:2px">
+        <span style="font-size:clamp(13px,1.8vh,17px);color:var(--ink2)">prostockhockey.com</span>
+      </div>
+      <span style="font-size:clamp(12px,1.6vh,15px);color:var(--ink4)">40</span>
+    </div>
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:7px 10px;border-radius:6px;background:var(--paper2);border:1px solid var(--rule);margin-bottom:5px">
+      <div style="display:flex;align-items:center;gap:8px">
+        <img src="https://www.google.com/s2/favicons?domain=youtube.com&sz=32" style="width:14px;height:14px;border-radius:2px">
+        <span style="font-size:clamp(13px,1.8vh,17px);color:var(--ink2)">youtube.com</span>
+      </div>
+      <span style="font-size:clamp(12px,1.6vh,15px);color:var(--ink4)">38</span>
+    </div>
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:7px 10px;border-radius:6px;background:var(--paper2);border:1px solid var(--rule);margin-bottom:5px">
+      <div style="display:flex;align-items:center;gap:8px">
+        <img src="https://www.google.com/s2/favicons?domain=hockeymonkey.com&sz=32" style="width:14px;height:14px;border-radius:2px">
+        <span style="font-size:clamp(13px,1.8vh,17px);color:var(--ink2)">hockeymonkey.com</span>
+      </div>
+      <span style="font-size:clamp(12px,1.6vh,15px);color:var(--ink4)">25</span>
+    </div>
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:7px 10px;border-radius:6px;background:var(--paper2);border:1px solid var(--rule);margin-bottom:5px">
+      <div style="display:flex;align-items:center;gap:8px">
+        <img src="https://www.google.com/s2/favicons?domain=icewarehouse.com&sz=32" style="width:14px;height:14px;border-radius:2px">
+        <span style="font-size:clamp(13px,1.8vh,17px);color:var(--ink2)">icewarehouse.com</span>
+      </div>
+      <span style="font-size:clamp(12px,1.6vh,15px);color:var(--ink4)">17</span>
+    </div>
+    <div style="margin-top:10px;padding:10px 14px;background:var(--accent-bg);border:1px solid var(--accent-bd);border-radius:6px;font-size:clamp(13px,1.8vh,16px);color:var(--accent-dark)">Reddit earns 42 AI citations in the hockey sticks category. prostockhockey.com earns 40. Hockey Stickman .ca earns 0 — while the .com domain earns 5. Your Canadian shoppers are being sent to American sites.</div>
   </div>
 </div>
 </div></section>
@@ -1109,71 +347,151 @@ ${hdrHtml(5,n)}
 <!-- SLIDE 06: Keyword Opportunity -->
 <section><div class="s">
 <div class="stripe"></div>
-${hdrHtml(6,n)}
+
+    <div class="hdr">
+      <div style="display:flex;align-items:center;gap:10px">
+        <img src="https://www.google.com/s2/favicons?domain=hockeystickman.ca&sz=128" style="border-radius:10px;width:clamp(26px,3.5vh,40px);height:clamp(26px,3.5vh,40px);object-fit:contain">
+        <span class="tag">SEO / AEO Proposal</span>
+      </div>
+      
+    <div class="hdr-right">
+      <div class="snum">06 / 12</div>
+      <a href="https://growthautomated.ai" target="_blank" rel="noopener" class="powered">
+        <span>Powered by</span><img src="https://cdn.shopify.com/s/files/1/0813/6707/3081/files/Color_logo_-_no_background_1f36d52b-3764-407f-930c-151eb23683f7.png?v=1740765450" alt="Growth Automated" style="height:clamp(10px,1.4vh,14px);width:auto;opacity:.8">
+      </a>
+    </div>
+    </div>
 <div class="divider"></div>
 <h2 style="margin-top:1vh">Keyword <span style="color:var(--accent)">Opportunity</span></h2>
 <div class="rg3" style="gap:clamp(10px,1.5vw,16px);flex:1;min-height:0">
-${kwHtml || `<div class="obox"><div style="font-weight:700;color:var(--ink);margin-bottom:8px">Comparison</div><div style="color:var(--ink4);font-size:14px">Add keyword clusters in the builder.</div></div>`}
+<div class="obox"><div style="font-weight:700;color:var(--ink);margin-bottom:8px">Comparison</div><div style="color:var(--ink4);font-size:14px">Add keyword clusters in the builder.</div></div>
 </div>
-${D.slide06callout ? `<div style="margin-top:clamp(8px,1.2vh,14px);padding:clamp(8px,1.1vh,12px) clamp(14px,1.8vw,20px);background:var(--accent-bg);border:1px solid var(--accent-bd);border-radius:6px;font-size:clamp(13px,1.8vh,17px);color:var(--accent-dark);font-weight:500;flex-shrink:0">${tok(D.slide06callout)}</div>` : ''}
+<div style="margin-top:clamp(8px,1.2vh,14px);padding:clamp(8px,1.1vh,12px) clamp(14px,1.8vw,20px);background:var(--accent-bg);border:1px solid var(--accent-bd);border-radius:6px;font-size:clamp(13px,1.8vh,17px);color:var(--accent-dark);font-weight:500;flex-shrink:0">Three structured changes — expanding llms.txt, building a stick selector hub with FAQ schema, and publishing a Pro Stock Canada guide — are projected to lift the AI score from 5 to 45-65 within 90 days.</div>
 </div></section>
 
 <!-- SLIDE 07: Competitor Capture -->
 <section><div class="s">
 <div class="stripe"></div>
-${hdrHtml(7,n)}
+
+    <div class="hdr">
+      <div style="display:flex;align-items:center;gap:10px">
+        <img src="https://www.google.com/s2/favicons?domain=hockeystickman.ca&sz=128" style="border-radius:10px;width:clamp(26px,3.5vh,40px);height:clamp(26px,3.5vh,40px);object-fit:contain">
+        <span class="tag">SEO / AEO Proposal</span>
+      </div>
+      
+    <div class="hdr-right">
+      <div class="snum">07 / 12</div>
+      <a href="https://growthautomated.ai" target="_blank" rel="noopener" class="powered">
+        <span>Powered by</span><img src="https://cdn.shopify.com/s/files/1/0813/6707/3081/files/Color_logo_-_no_background_1f36d52b-3764-407f-930c-151eb23683f7.png?v=1740765450" alt="Growth Automated" style="height:clamp(10px,1.4vh,14px);width:auto;opacity:.8">
+      </a>
+    </div>
+    </div>
 <div class="divider"></div>
 <h2 style="margin-top:1vh">Capturing <span style="color:var(--accent)">Competitor Search Traffic</span></h2>
-<p style="font-size:clamp(16px,2.3vh,23px);color:var(--ink2);line-height:1.5;margin:0 0 clamp(16px,2.4vh,28px);font-weight:500">${tok(D.buyerType)||'Buyers'} actively search for alternatives to tools they already use.<br><span style="color:var(--ink3);font-weight:400">We create content that positions ${tok(D.clientName)} as the answer every time someone asks AI or Google for a better option.</span></p>
+<p style="font-size:clamp(16px,2.3vh,23px);color:var(--ink2);line-height:1.5;margin:0 0 clamp(16px,2.4vh,28px);font-weight:500">eCommerce actively search for alternatives to tools they already use.<br><span style="color:var(--ink3);font-weight:400">We create content that positions Hockey Stickman as the answer every time someone asks AI or Google for a better option.</span></p>
 <div style="display:flex;align-items:stretch;gap:clamp(6px,1vw,12px);flex:1;min-height:0">
   <div style="flex:1;background:var(--paper2);border:1px solid var(--rule);border-radius:8px;padding:clamp(10px,1.4vh,18px) clamp(12px,1.4vw,18px);overflow-y:auto">
-    <div style="font-size:clamp(13px,1.7vh,17px);font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--ink4);padding-bottom:8px;border-bottom:1px solid var(--rule);margin-bottom:12px">${tok(D.clientName)} Competitors</div>
-    ${compAltsHtml || '<p style="color:var(--ink4);font-size:14px">Add competitors in the builder.</p>'}
+    <div style="font-size:clamp(13px,1.7vh,17px);font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--ink4);padding-bottom:8px;border-bottom:1px solid var(--rule);margin-bottom:12px">Hockey Stickman Competitors</div>
+    <p style="color:var(--ink4);font-size:14px">Add competitors in the builder.</p>
   </div>
   <div style="display:flex;align-items:center;justify-content:center;flex-shrink:0;width:clamp(28px,3.5vw,44px)">
     <span style="font-size:clamp(22px,3.5vh,36px);font-weight:700;color:var(--accent)">+</span>
   </div>
   <div style="flex:1;background:var(--accent-bg);border:1px solid var(--accent-bd);border-radius:8px;padding:clamp(10px,1.4vh,18px) clamp(12px,1.4vw,18px);overflow-y:auto">
     <div style="font-size:clamp(13px,1.7vh,17px);font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--accent-dark);padding-bottom:8px;border-bottom:1px solid var(--accent-bd);margin-bottom:12px">Content to Create First</div>
-    ${compAltContentHtml || '<p style="color:var(--ink4);font-size:14px">Add competitors above to see content ideas.</p>'}
+    <p style="color:var(--ink4);font-size:14px">Add competitors above to see content ideas.</p>
   </div>
 </div>
 <div style="margin-top:clamp(10px,1.5vh,16px);padding:clamp(8px,1.1vh,12px) clamp(14px,1.8vw,20px);background:var(--paper2);border:1px solid var(--rule);border-radius:6px;flex-shrink:0">
-  <span style="font-size:clamp(13px,1.8vh,17px);color:var(--ink2)">${tok(D.slide07subtitle)||`These are the tools ${tok(D.buyerType)||'your buyers'} already use. When they search for better options, ${tok(D.clientName)} needs to be the answer.`}</span>
+  <span style="font-size:clamp(13px,1.8vh,17px);color:var(--ink2)">Pragmatic AEO inside Growth Automated — a Shopify Revenue Growth Agency</span>
 </div>
 </div></section>
 
 <!-- SLIDE 08: Deliverables -->
 <section><div class="s">
 <div class="stripe"></div>
-${hdrHtml(8,n)}
+
+    <div class="hdr">
+      <div style="display:flex;align-items:center;gap:10px">
+        <img src="https://www.google.com/s2/favicons?domain=hockeystickman.ca&sz=128" style="border-radius:10px;width:clamp(26px,3.5vh,40px);height:clamp(26px,3.5vh,40px);object-fit:contain">
+        <span class="tag">SEO / AEO Proposal</span>
+      </div>
+      
+    <div class="hdr-right">
+      <div class="snum">08 / 12</div>
+      <a href="https://growthautomated.ai" target="_blank" rel="noopener" class="powered">
+        <span>Powered by</span><img src="https://cdn.shopify.com/s/files/1/0813/6707/3081/files/Color_logo_-_no_background_1f36d52b-3764-407f-930c-151eb23683f7.png?v=1740765450" alt="Growth Automated" style="height:clamp(10px,1.4vh,14px);width:auto;opacity:.8">
+      </a>
+    </div>
+    </div>
 <div class="divider"></div>
 <h2 style="margin-top:1vh">What We <span style="color:var(--accent)">Deliver Every Month</span></h2>
-<p style="font-size:clamp(16px,2.3vh,23px);color:var(--ink2);line-height:1.5;margin:0 0 clamp(16px,2.2vh,24px);font-weight:500">A full managed service covering everything ${tok(D.clientName)} needs to grow in search and AI, executed every month.</p>
+<p style="font-size:clamp(16px,2.3vh,23px);color:var(--ink2);line-height:1.5;margin:0 0 clamp(16px,2.2vh,24px);font-weight:500">A full managed service covering everything Hockey Stickman needs to grow in search and AI, executed every month.</p>
 <div class="rg2" style="gap:clamp(10px,1.4vw,16px);flex:1;min-height:0;align-content:start">
-  ${[
-    ['Content','8 High-Quality Content Pieces','Per month','Keyword-targeted articles and landing pages built to rank on Google and get cited by AI.'],
-    ['Schema','Schema Markup Implementation','Site-wide',`Product, FAQ, HowTo, and Organization schema across the ${tok(D.clientName)} site so AI models can understand and cite it correctly.`],
-    ['On-Page','On-Page SEO Optimization','Ongoing','Meta titles, headings, and internal linking across all pages, with every page treated as an entry point for a high-intent buyer.'],
-    ['Reddit','Reddit Presence','Weekly','Reddit is a top cited source in AI answers. Weekly posts in relevant communities build the brand signals AI uses to recommend tools.'],
-    ['Updates','Content Updates and Pruning','Ongoing','Existing pages refreshed with updated keyword targeting. Stale content consolidated or removed as the site grows.'],
-    ['Reports','Monthly Reporting','Monthly','Rankings, traffic, and AI citation data delivered monthly. You always know what moved and what comes next.'],
-  ].map(([_,title,badge,desc]) => `
+  
   <div style="background:var(--paper2);border:1px solid var(--rule);border-radius:10px;padding:clamp(12px,1.6vh,18px) clamp(14px,1.6vw,18px);display:flex;flex-direction:column;gap:6px">
     <div style="display:flex;align-items:center;gap:8px">
-      <div style="font-size:clamp(14px,2vh,20px);font-weight:700;color:var(--ink)">${title}</div>
-      <span style="font-size:clamp(9px,1.05vh,11px);font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--accent-dark);background:var(--accent-bg);border:1px solid var(--accent-bd);border-radius:3px;padding:1px 6px;white-space:nowrap;flex-shrink:0">${badge}</span>
+      <div style="font-size:clamp(14px,2vh,20px);font-weight:700;color:var(--ink)">8 High-Quality Content Pieces</div>
+      <span style="font-size:clamp(9px,1.05vh,11px);font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--accent-dark);background:var(--accent-bg);border:1px solid var(--accent-bd);border-radius:3px;padding:1px 6px;white-space:nowrap;flex-shrink:0">Per month</span>
     </div>
-    <div style="font-size:clamp(13px,1.8vh,17px);color:var(--ink3);line-height:1.5">${desc}</div>
-  </div>`).join('')}
-${D.slide08callout ? `<p style="font-size:clamp(13px,1.8vh,17px);color:var(--ink4);text-align:center;margin:clamp(8px,1.2vh,14px) 0 0;font-style:italic">${tok(D.slide08callout)}</p>` : ''}
+    <div style="font-size:clamp(13px,1.8vh,17px);color:var(--ink3);line-height:1.5">Keyword-targeted articles and landing pages built to rank on Google and get cited by AI.</div>
+  </div>
+  <div style="background:var(--paper2);border:1px solid var(--rule);border-radius:10px;padding:clamp(12px,1.6vh,18px) clamp(14px,1.6vw,18px);display:flex;flex-direction:column;gap:6px">
+    <div style="display:flex;align-items:center;gap:8px">
+      <div style="font-size:clamp(14px,2vh,20px);font-weight:700;color:var(--ink)">Schema Markup Implementation</div>
+      <span style="font-size:clamp(9px,1.05vh,11px);font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--accent-dark);background:var(--accent-bg);border:1px solid var(--accent-bd);border-radius:3px;padding:1px 6px;white-space:nowrap;flex-shrink:0">Site-wide</span>
+    </div>
+    <div style="font-size:clamp(13px,1.8vh,17px);color:var(--ink3);line-height:1.5">Product, FAQ, HowTo, and Organization schema across the Hockey Stickman site so AI models can understand and cite it correctly.</div>
+  </div>
+  <div style="background:var(--paper2);border:1px solid var(--rule);border-radius:10px;padding:clamp(12px,1.6vh,18px) clamp(14px,1.6vw,18px);display:flex;flex-direction:column;gap:6px">
+    <div style="display:flex;align-items:center;gap:8px">
+      <div style="font-size:clamp(14px,2vh,20px);font-weight:700;color:var(--ink)">On-Page SEO Optimization</div>
+      <span style="font-size:clamp(9px,1.05vh,11px);font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--accent-dark);background:var(--accent-bg);border:1px solid var(--accent-bd);border-radius:3px;padding:1px 6px;white-space:nowrap;flex-shrink:0">Ongoing</span>
+    </div>
+    <div style="font-size:clamp(13px,1.8vh,17px);color:var(--ink3);line-height:1.5">Meta titles, headings, and internal linking across all pages, with every page treated as an entry point for a high-intent buyer.</div>
+  </div>
+  <div style="background:var(--paper2);border:1px solid var(--rule);border-radius:10px;padding:clamp(12px,1.6vh,18px) clamp(14px,1.6vw,18px);display:flex;flex-direction:column;gap:6px">
+    <div style="display:flex;align-items:center;gap:8px">
+      <div style="font-size:clamp(14px,2vh,20px);font-weight:700;color:var(--ink)">Reddit Presence</div>
+      <span style="font-size:clamp(9px,1.05vh,11px);font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--accent-dark);background:var(--accent-bg);border:1px solid var(--accent-bd);border-radius:3px;padding:1px 6px;white-space:nowrap;flex-shrink:0">Weekly</span>
+    </div>
+    <div style="font-size:clamp(13px,1.8vh,17px);color:var(--ink3);line-height:1.5">Reddit is a top cited source in AI answers. Weekly posts in relevant communities build the brand signals AI uses to recommend tools.</div>
+  </div>
+  <div style="background:var(--paper2);border:1px solid var(--rule);border-radius:10px;padding:clamp(12px,1.6vh,18px) clamp(14px,1.6vw,18px);display:flex;flex-direction:column;gap:6px">
+    <div style="display:flex;align-items:center;gap:8px">
+      <div style="font-size:clamp(14px,2vh,20px);font-weight:700;color:var(--ink)">Content Updates and Pruning</div>
+      <span style="font-size:clamp(9px,1.05vh,11px);font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--accent-dark);background:var(--accent-bg);border:1px solid var(--accent-bd);border-radius:3px;padding:1px 6px;white-space:nowrap;flex-shrink:0">Ongoing</span>
+    </div>
+    <div style="font-size:clamp(13px,1.8vh,17px);color:var(--ink3);line-height:1.5">Existing pages refreshed with updated keyword targeting. Stale content consolidated or removed as the site grows.</div>
+  </div>
+  <div style="background:var(--paper2);border:1px solid var(--rule);border-radius:10px;padding:clamp(12px,1.6vh,18px) clamp(14px,1.6vw,18px);display:flex;flex-direction:column;gap:6px">
+    <div style="display:flex;align-items:center;gap:8px">
+      <div style="font-size:clamp(14px,2vh,20px);font-weight:700;color:var(--ink)">Monthly Reporting</div>
+      <span style="font-size:clamp(9px,1.05vh,11px);font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--accent-dark);background:var(--accent-bg);border:1px solid var(--accent-bd);border-radius:3px;padding:1px 6px;white-space:nowrap;flex-shrink:0">Monthly</span>
+    </div>
+    <div style="font-size:clamp(13px,1.8vh,17px);color:var(--ink3);line-height:1.5">Rankings, traffic, and AI citation data delivered monthly. You always know what moved and what comes next.</div>
+  </div>
+<p style="font-size:clamp(13px,1.8vh,17px);color:var(--ink4);text-align:center;margin:clamp(8px,1.2vh,14px) 0 0;font-style:italic">We track visibility across ChatGPT, Gemini, Perplexity, Google AIO, and Google AI Mode — 5 models, live data, updated weekly.</p>
 </div>
 </div></section>
 
 <!-- SLIDE 09: Measuring Success -->
 <section><div class="s">
 <div class="stripe"></div>
-${hdrHtml(9,n)}
+
+    <div class="hdr">
+      <div style="display:flex;align-items:center;gap:10px">
+        <img src="https://www.google.com/s2/favicons?domain=hockeystickman.ca&sz=128" style="border-radius:10px;width:clamp(26px,3.5vh,40px);height:clamp(26px,3.5vh,40px);object-fit:contain">
+        <span class="tag">SEO / AEO Proposal</span>
+      </div>
+      
+    <div class="hdr-right">
+      <div class="snum">09 / 12</div>
+      <a href="https://growthautomated.ai" target="_blank" rel="noopener" class="powered">
+        <span>Powered by</span><img src="https://cdn.shopify.com/s/files/1/0813/6707/3081/files/Color_logo_-_no_background_1f36d52b-3764-407f-930c-151eb23683f7.png?v=1740765450" alt="Growth Automated" style="height:clamp(10px,1.4vh,14px);width:auto;opacity:.8">
+      </a>
+    </div>
+    </div>
 <div class="divider"></div>
 <h2 style="margin-top:1vh">How We <span style="color:var(--accent)">Measure Success</span></h2>
 <p style="font-size:clamp(15px,2.1vh,22px);color:var(--ink2);line-height:1.5;margin:0 0 clamp(12px,1.8vh,20px);font-weight:500">We track progress across both traditional search and AI platforms every month.</p>
@@ -1181,105 +499,101 @@ ${hdrHtml(9,n)}
   <div style="background:var(--paper2);border:1px solid var(--rule);border-radius:10px;padding:clamp(10px,1.4vh,16px);display:flex;flex-direction:column">
     <img src="https://uxwing.com/wp-content/themes/uxwing/download/brands-and-social-media/google-search-console-icon.png" style="width:clamp(32px,4.5vh,46px);height:clamp(32px,4.5vh,46px);border-radius:8px;margin-bottom:clamp(8px,1.2vh,14px);object-fit:contain">
     <div style="font-size:clamp(14px,2vh,21px);font-weight:700;color:var(--ink);margin-bottom:6px">Google Search Console</div>
-    <p style="font-size:clamp(12px,1.6vh,16px);color:var(--ink3);line-height:1.55;flex:1">Every query ${tok(D.clientName)} appears for in Google, with impressions, clicks, and rankings over time.</p>
+    <p style="font-size:clamp(12px,1.6vh,16px);color:var(--ink3);line-height:1.55;flex:1">Every query Hockey Stickman appears for in Google, with impressions, clicks, and rankings over time.</p>
   </div>
   <div style="background:var(--paper2);border:1px solid var(--rule);border-radius:10px;padding:clamp(10px,1.4vh,16px);display:flex;flex-direction:column">
     <img src="https://images.icon-icons.com/2699/PNG/512/google_analytics_image_logo_icon_168152.png" style="width:clamp(32px,4.5vh,46px);height:clamp(32px,4.5vh,46px);border-radius:8px;margin-bottom:clamp(8px,1.2vh,14px);object-fit:contain">
     <div style="font-size:clamp(14px,2vh,21px);font-weight:700;color:var(--ink);margin-bottom:6px">Google Analytics 4</div>
-    <p style="font-size:clamp(12px,1.6vh,16px);color:var(--ink3);line-height:1.55;flex:1">Who visits ${tok(D.clientName)}, where they come from, and whether they convert to ${tok(D.buyerType?'customers':D.buyerType)||'conversions'}.</p>
+    <p style="font-size:clamp(12px,1.6vh,16px);color:var(--ink3);line-height:1.55;flex:1">Who visits Hockey Stickman, where they come from, and whether they convert to customers.</p>
   </div>
   <div style="background:var(--paper2);border:1px solid var(--rule);border-radius:10px;padding:clamp(10px,1.4vh,16px);display:flex;flex-direction:column">
-    ${toolLogoHtml}
-    <div style="font-size:clamp(14px,2vh,21px);font-weight:700;color:var(--ink);margin-bottom:6px">${tok(D.agencyToolName)||tok(D.agencyName)||'AI Tracking'}</div>
-    <p style="font-size:clamp(12px,1.6vh,16px);color:var(--ink3);line-height:1.55;flex:1">${tok(D.agencyToolDesc)||`Tracks whether ${tok(D.clientName)} appears in AI answers when ${tok(D.buyerType)||'buyers'} research solutions in your category.`}</p>
+    <img src="https://cdn.shopify.com/s/files/1/0813/6707/3081/files/Color_logo_-_no_background_1f36d52b-3764-407f-930c-151eb23683f7.png?v=1740765450" style="width:clamp(32px,4.5vh,46px);height:clamp(32px,4.5vh,46px);border-radius:8px;margin-bottom:clamp(10px,1.4vh,16px);display:block;object-fit:contain">
+    <div style="font-size:clamp(14px,2vh,21px);font-weight:700;color:var(--ink);margin-bottom:6px">AI Peekaboo</div>
+    <p style="font-size:clamp(12px,1.6vh,16px);color:var(--ink3);line-height:1.55;flex:1">Tracks brand visibility across ChatGPT, Gemini, Perplexity, Google AIO, and Google AI Mode.</p>
   </div>
-${D.slide09note ? `<p style="font-size:clamp(13px,1.8vh,17px);color:var(--ink4);text-align:center;margin:clamp(8px,1.2vh,14px) 0 0;font-style:italic">${tok(D.slide09note)}</p>` : ''}
+<p style="font-size:clamp(13px,1.8vh,17px);color:var(--ink4);text-align:center;margin:clamp(8px,1.2vh,14px) 0 0;font-style:italic">Recent clients include WBM Technologies and Credit Canada — both had zero AI citations before we started.</p>
 </div>
 </div></section>
 
 <!-- SLIDE 10: Investment & Timeline -->
 <section><div class="s">
 <div class="stripe"></div>
-${hdrHtml(10,n)}
+
+    <div class="hdr">
+      <div style="display:flex;align-items:center;gap:10px">
+        <img src="https://www.google.com/s2/favicons?domain=hockeystickman.ca&sz=128" style="border-radius:10px;width:clamp(26px,3.5vh,40px);height:clamp(26px,3.5vh,40px);object-fit:contain">
+        <span class="tag">SEO / AEO Proposal</span>
+      </div>
+      
+    <div class="hdr-right">
+      <div class="snum">10 / 12</div>
+      <a href="https://growthautomated.ai" target="_blank" rel="noopener" class="powered">
+        <span>Powered by</span><img src="https://cdn.shopify.com/s/files/1/0813/6707/3081/files/Color_logo_-_no_background_1f36d52b-3764-407f-930c-151eb23683f7.png?v=1740765450" alt="Growth Automated" style="height:clamp(10px,1.4vh,14px);width:auto;opacity:.8">
+      </a>
+    </div>
+    </div>
 <div class="divider"></div>
-<h2 style="margin-top:1vh">${tok(D.slide10headline)||'Your Investment.'} <span style="color:var(--accent)">${tok(D.slide10headline)?'':' What We Deliver and When.'}</span></h2>
+<h2 style="margin-top:1vh">Ready to own the hockey category in AI? <span style="color:var(--accent)"></span></h2>
 <div class="rg2" style="gap:clamp(20px,3vw,38px);flex:1;min-height:0;margin-top:clamp(12px,1.8vh,20px)">
   <div style="display:flex;flex-direction:column;gap:clamp(14px,2vh,22px)">
-    ${[
-      ['Month 1 · Foundation','Audit, Access & First Deliverables',[
-        'Request access to Google Analytics, Google Search Console, and '+(D.cmsType||'CMS'),
-        'Full SEO and AEO audit, keyword mapping and content gap analysis',
-        '4 high-quality articles drafted, published and indexed',
-        'Schema implementation begins, meta titles and headings optimised',
-      ]],
-      ['Month 2 · Build','Content, On-Page & Community',[
-        'First 8 high-intent articles published and indexed',
-        'Reddit presence launched, weekly posts in relevant communities',
-        'On-page optimisation across all key pages',
-      ]],
-      ['Month 3 · Compound','Competitor Pages & AEO Refinement',[
-        `Alternatives pages vs. ${tok(D.timelineM3)||'top competitors'} live`,
-        'AI visibility score review and prompt-by-prompt gap closing',
-        'Monthly report delivered, Month 4 priorities aligned',
-      ]],
-    ].map(([label,title,items],i,arr) => `
+    
     <div style="display:flex;gap:14px">
       <div style="display:flex;flex-direction:column;align-items:center;flex-shrink:0;width:30px">
         <div style="width:12px;height:12px;border-radius:50%;background:var(--accent);flex-shrink:0;margin-top:3px"></div>
-        ${i < arr.length-1 ? '<div style="width:2px;flex:1;background:var(--rule);min-height:20px"></div>' : ''}
+        <div style="width:2px;flex:1;background:var(--rule);min-height:20px"></div>
       </div>
       <div style="flex:1">
-        <div style="font-size:clamp(10px,1.2vh,12px);font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);margin-bottom:3px">${label}</div>
-        <div style="font-size:clamp(15px,2.1vh,21px);font-weight:700;color:var(--ink);margin-bottom:6px">${title}</div>
-        ${items.map(it=>`<div style="font-size:clamp(13px,1.8vh,17px);color:var(--ink3);display:flex;gap:7px;margin-bottom:3px"><span style="color:var(--accent);flex-shrink:0">·</span>${it}</div>`).join('')}
+        <div style="font-size:clamp(10px,1.2vh,12px);font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);margin-bottom:3px">Month 1 · Foundation</div>
+        <div style="font-size:clamp(15px,2.1vh,21px);font-weight:700;color:var(--ink);margin-bottom:6px">Audit, Access & First Deliverables</div>
+        <div style="font-size:clamp(13px,1.8vh,17px);color:var(--ink3);display:flex;gap:7px;margin-bottom:3px"><span style="color:var(--accent);flex-shrink:0">·</span>Request access to Google Analytics, Google Search Console, and Shopify</div><div style="font-size:clamp(13px,1.8vh,17px);color:var(--ink3);display:flex;gap:7px;margin-bottom:3px"><span style="color:var(--accent);flex-shrink:0">·</span>Full SEO and AEO audit, keyword mapping and content gap analysis</div><div style="font-size:clamp(13px,1.8vh,17px);color:var(--ink3);display:flex;gap:7px;margin-bottom:3px"><span style="color:var(--accent);flex-shrink:0">·</span>4 high-quality articles drafted, published and indexed</div><div style="font-size:clamp(13px,1.8vh,17px);color:var(--ink3);display:flex;gap:7px;margin-bottom:3px"><span style="color:var(--accent);flex-shrink:0">·</span>Schema implementation begins, meta titles and headings optimised</div>
       </div>
-    </div>`).join('')}
+    </div>
+    <div style="display:flex;gap:14px">
+      <div style="display:flex;flex-direction:column;align-items:center;flex-shrink:0;width:30px">
+        <div style="width:12px;height:12px;border-radius:50%;background:var(--accent);flex-shrink:0;margin-top:3px"></div>
+        <div style="width:2px;flex:1;background:var(--rule);min-height:20px"></div>
+      </div>
+      <div style="flex:1">
+        <div style="font-size:clamp(10px,1.2vh,12px);font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);margin-bottom:3px">Month 2 · Build</div>
+        <div style="font-size:clamp(15px,2.1vh,21px);font-weight:700;color:var(--ink);margin-bottom:6px">Content, On-Page & Community</div>
+        <div style="font-size:clamp(13px,1.8vh,17px);color:var(--ink3);display:flex;gap:7px;margin-bottom:3px"><span style="color:var(--accent);flex-shrink:0">·</span>First 8 high-intent articles published and indexed</div><div style="font-size:clamp(13px,1.8vh,17px);color:var(--ink3);display:flex;gap:7px;margin-bottom:3px"><span style="color:var(--accent);flex-shrink:0">·</span>Reddit presence launched, weekly posts in relevant communities</div><div style="font-size:clamp(13px,1.8vh,17px);color:var(--ink3);display:flex;gap:7px;margin-bottom:3px"><span style="color:var(--accent);flex-shrink:0">·</span>On-page optimisation across all key pages</div>
+      </div>
+    </div>
+    <div style="display:flex;gap:14px">
+      <div style="display:flex;flex-direction:column;align-items:center;flex-shrink:0;width:30px">
+        <div style="width:12px;height:12px;border-radius:50%;background:var(--accent);flex-shrink:0;margin-top:3px"></div>
+        
+      </div>
+      <div style="flex:1">
+        <div style="font-size:clamp(10px,1.2vh,12px);font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);margin-bottom:3px">Month 3 · Compound</div>
+        <div style="font-size:clamp(15px,2.1vh,21px);font-weight:700;color:var(--ink);margin-bottom:6px">Competitor Pages & AEO Refinement</div>
+        <div style="font-size:clamp(13px,1.8vh,17px);color:var(--ink3);display:flex;gap:7px;margin-bottom:3px"><span style="color:var(--accent);flex-shrink:0">·</span>Alternatives pages vs. Target score 45–65/100 by end of month 3 live</div><div style="font-size:clamp(13px,1.8vh,17px);color:var(--ink3);display:flex;gap:7px;margin-bottom:3px"><span style="color:var(--accent);flex-shrink:0">·</span>AI visibility score review and prompt-by-prompt gap closing</div><div style="font-size:clamp(13px,1.8vh,17px);color:var(--ink3);display:flex;gap:7px;margin-bottom:3px"><span style="color:var(--accent);flex-shrink:0">·</span>Monthly report delivered, Month 4 priorities aligned</div>
+      </div>
+    </div>
   </div>
   <div style="display:flex;flex-direction:column;gap:clamp(10px,1.4vh,16px)">
-    ${D.monthlyPrice2 ? `
-    <div style="display:flex;gap:clamp(8px,1.2vw,14px)">
-      <div style="flex:1;background:var(--accent-bg);border:2px solid var(--accent);border-radius:10px;padding:clamp(12px,1.8vh,22px);position:relative">
-        <div style="position:absolute;top:-1px;left:14px;background:var(--accent);color:#fff;font-size:clamp(9px,1vh,11px);font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:3px 10px;border-radius:0 0 6px 6px">Recommended</div>
-        <div style="font-size:clamp(9px,1.1vh,11px);font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--accent-dark);margin-bottom:8px;margin-top:6px">${tok(D.tier1Label)||'Full Pilot ✓'}</div>
-        <div style="font-family:'DM Mono',monospace;font-size:clamp(22px,3.4vh,40px);font-weight:500;color:var(--accent);letter-spacing:-.04em;line-height:1;margin-bottom:4px">${tok(D.monthlyPrice2)||'$3,832.50'}<span style="font-size:clamp(12px,1.5vh,15px);font-weight:400;color:var(--accent-dark);letter-spacing:0"> / mo CAD</span></div>
-        ${D.tier1Total ? `<div style="font-size:clamp(10px,1.3vh,13px);color:var(--accent-dark);margin-bottom:6px;font-family:'DM Mono',monospace">${tok(D.tier1Total)} over 6 months</div>` : ''}
-        <div style="font-size:clamp(11px,1.4vh,14px);color:var(--accent-dark);line-height:1.4">Full execution — audit, schema, content, Reddit presence & AI citation building.</div>
-      </div>
-      <div style="flex:1;background:var(--paper2);border:1px solid var(--rule);border-radius:10px;padding:clamp(12px,1.8vh,22px)">
-        <div style="font-size:clamp(9px,1.1vh,11px);font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--ink4);margin-bottom:8px">${tok(D.tier2Label)||'Accelerate'}</div>
-        <div style="font-family:'DM Mono',monospace;font-size:clamp(22px,3.4vh,40px);font-weight:500;color:var(--ink);letter-spacing:-.04em;line-height:1;margin-bottom:4px">${tok(D.monthlyPrice)||'$4,935'}<span style="font-size:clamp(12px,1.5vh,15px);font-weight:400;color:var(--ink4);letter-spacing:0"> / mo CAD</span></div>
-        ${D.tier2Total ? `<div style="font-size:clamp(10px,1.3vh,13px);color:var(--ink4);margin-bottom:6px;font-family:'DM Mono',monospace">${tok(D.tier2Total)} over 6 months</div>` : ''}
-        <div style="font-size:clamp(11px,1.4vh,14px);color:var(--ink3);line-height:1.4">Everything in Full Pilot plus accelerated content velocity and expanded AI citation outreach.</div>
-      </div>
-    </div>` : `
-    ${D.monthlyPrice2 ? `
-    <div style="display:flex;gap:clamp(8px,1.2vw,14px)">
-      <div style="flex:1;background:var(--accent-bg);border:2px solid var(--accent);border-radius:10px;padding:clamp(12px,1.8vh,22px);position:relative">
-        <div style="position:absolute;top:-1px;left:14px;background:var(--accent);color:#fff;font-size:clamp(9px,1vh,11px);font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:3px 10px;border-radius:0 0 6px 6px">Recommended</div>
-        <div style="font-size:clamp(9px,1.1vh,11px);font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--accent-dark);margin-bottom:8px;margin-top:6px">${tok(D.tier1Label)||'Full Pilot ✓'}</div>
-        <div style="font-family:'DM Mono',monospace;font-size:clamp(22px,3.4vh,40px);font-weight:500;color:var(--accent);letter-spacing:-.04em;line-height:1;margin-bottom:4px">${tok(D.monthlyPrice2)||'$3,832.50'}<span style="font-size:clamp(12px,1.5vh,15px);font-weight:400;color:var(--accent-dark);letter-spacing:0"> / mo CAD</span></div>
-        ${D.tier1Total ? `<div style="font-size:clamp(10px,1.3vh,13px);color:var(--accent-dark);margin-bottom:6px;font-family:'DM Mono',monospace">${tok(D.tier1Total)} over 6 months</div>` : ''}
-        <div style="font-size:clamp(11px,1.4vh,14px);color:var(--accent-dark);line-height:1.4">Full execution — audit, schema, content, Reddit presence & AI citation building.</div>
-      </div>
-      <div style="flex:1;background:var(--paper2);border:1px solid var(--rule);border-radius:10px;padding:clamp(12px,1.8vh,22px)">
-        <div style="font-size:clamp(9px,1.1vh,11px);font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--ink4);margin-bottom:8px">${tok(D.tier2Label)||'Accelerate'}</div>
-        <div style="font-family:'DM Mono',monospace;font-size:clamp(22px,3.4vh,40px);font-weight:500;color:var(--ink);letter-spacing:-.04em;line-height:1;margin-bottom:4px">${tok(D.monthlyPrice)||'$4,935'}<span style="font-size:clamp(12px,1.5vh,15px);font-weight:400;color:var(--ink4);letter-spacing:0"> / mo CAD</span></div>
-        ${D.tier2Total ? `<div style="font-size:clamp(10px,1.3vh,13px);color:var(--ink4);margin-bottom:6px;font-family:'DM Mono',monospace">${tok(D.tier2Total)} over 6 months</div>` : ''}
-        <div style="font-size:clamp(11px,1.4vh,14px);color:var(--ink3);line-height:1.4">Everything in Full Pilot plus accelerated content velocity and expanded AI citation outreach.</div>
-      </div>
-    </div>` : `
+    
+    
     <div style="background:var(--accent-bg);border:1px solid var(--accent-bd);border-radius:10px;padding:clamp(16px,2.2vh,26px)">
       <div style="font-size:clamp(10px,1.3vh,12px);font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--accent-dark);margin-bottom:10px">Monthly Investment</div>
-      <div style="font-family:'DM Mono',monospace;font-size:clamp(28px,4.5vh,50px);font-weight:500;color:var(--accent);letter-spacing:-.04em;line-height:1;margin-bottom:8px">${tok(D.monthlyPrice)||'$1,500'}<span style="font-size:clamp(14px,1.8vh,18px);font-weight:400;color:var(--accent-dark);letter-spacing:0"> / mo</span></div>
+      <div style="font-family:'DM Mono',monospace;font-size:clamp(28px,4.5vh,50px);font-weight:500;color:var(--accent);letter-spacing:-.04em;line-height:1;margin-bottom:8px">$4,000<span style="font-size:clamp(14px,1.8vh,18px);font-weight:400;color:var(--accent-dark);letter-spacing:0"> / mo</span></div>
       <div style="font-size:clamp(13px,1.8vh,17px);color:var(--accent-dark);line-height:1.5">Everything in the deliverables slide, executed every month.</div>
-    </div>`}`}
+    </div>
     <div class="obox">
       <div style="font-size:clamp(10px,1.2vh,12px);font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--ink4);margin-bottom:10px">How It Works</div>
-      ${[tok(D.howItWorks1)||'Work begins in week one, no ramp-up delay', tok(D.howItWorks2)||'Monthly strategy call to review results and set priorities', tok(D.howItWorks3)||'6-month minimum, then cancel anytime with 30 days notice'].map(t=>`
+      
       <div style="display:flex;align-items:flex-start;gap:10px;margin-bottom:8px">
         <svg style="width:14px;height:14px;flex-shrink:0;margin-top:3px" viewBox="0 0 24 24" fill="none" stroke="var(--ok)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-        <span style="font-size:clamp(13px,1.8vh,17px);color:var(--ink2);line-height:1.5">${t}</span>
-      </div>`).join('')}
+        <span style="font-size:clamp(13px,1.8vh,17px);color:var(--ink2);line-height:1.5">We audit your 290+ articles and identify which ones are closest to ranking in AI answers — then structure them for citation.</span>
+      </div>
+      <div style="display:flex;align-items:flex-start;gap:10px;margin-bottom:8px">
+        <svg style="width:14px;height:14px;flex-shrink:0;margin-top:3px" viewBox="0 0 24 24" fill="none" stroke="var(--ok)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        <span style="font-size:clamp(13px,1.8vh,17px);color:var(--ink2);line-height:1.5">We expand your llms.txt from a commerce protocol into an authority brief that tells AI models what Hockey Stickman knows.</span>
+      </div>
+      <div style="display:flex;align-items:flex-start;gap:10px;margin-bottom:8px">
+        <svg style="width:14px;height:14px;flex-shrink:0;margin-top:3px" viewBox="0 0 24 24" fill="none" stroke="var(--ok)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        <span style="font-size:clamp(13px,1.8vh,17px);color:var(--ink2);line-height:1.5">We build the Pro Stock Canada guide and Stick Selector hub — the two pages that will flip prostockhockey.com's 40 citations to yours.</span>
+      </div>
     </div>
   </div>
 </div>
@@ -1288,18 +602,31 @@ ${hdrHtml(10,n)}
 <!-- SLIDE 11: Next Steps -->
 <section><div class="s">
 <div class="stripe"></div>
-${hdrHtml(11,n)}
+
+    <div class="hdr">
+      <div style="display:flex;align-items:center;gap:10px">
+        <img src="https://www.google.com/s2/favicons?domain=hockeystickman.ca&sz=128" style="border-radius:10px;width:clamp(26px,3.5vh,40px);height:clamp(26px,3.5vh,40px);object-fit:contain">
+        <span class="tag">SEO / AEO Proposal</span>
+      </div>
+      
+    <div class="hdr-right">
+      <div class="snum">11 / 12</div>
+      <a href="https://growthautomated.ai" target="_blank" rel="noopener" class="powered">
+        <span>Powered by</span><img src="https://cdn.shopify.com/s/files/1/0813/6707/3081/files/Color_logo_-_no_background_1f36d52b-3764-407f-930c-151eb23683f7.png?v=1740765450" alt="Growth Automated" style="height:clamp(10px,1.4vh,14px);width:auto;opacity:.8">
+      </a>
+    </div>
+    </div>
 <div class="divider"></div>
-<h2 style="margin-top:1vh">Next Steps to Getting <span style="color:var(--accent)">${tok(D.clientName)} Visible in AI</span></h2>
+<h2 style="margin-top:1vh">Next Steps to Getting <span style="color:var(--accent)">Hockey Stickman Visible in AI</span></h2>
 <div style="flex:1;display:flex;flex-direction:column;justify-content:center;gap:clamp(16px,2.5vh,28px);min-height:0">
-  <a href="${tok(D.agencyBooking)||'#'}" target="_blank" rel="noopener" style="display:flex;align-items:center;justify-content:center;background:var(--accent-bg);border:2px solid var(--accent);border-radius:10px;padding:clamp(18px,3vh,32px);text-decoration:none">
+  <a href="https://seo-for-ai.growthautomated.ai/book_time" target="_blank" rel="noopener" style="display:flex;align-items:center;justify-content:center;background:var(--accent-bg);border:2px solid var(--accent);border-radius:10px;padding:clamp(18px,3vh,32px);text-decoration:none">
     <span style="font-size:clamp(20px,3.2vh,32px);font-weight:700;color:var(--accent)">Book a Meeting</span>
   </a>
-  <p style="font-size:clamp(14px,1.9vh,19px);color:var(--ink3);line-height:1.6;text-align:center;max-width:70ch;margin:0 auto">${tok(D.closingPara)||`You have seen where ${tok(D.clientName)} stands, who is getting cited instead, and exactly what we would build to change that.`}</p>
+  <p style="font-size:clamp(14px,1.9vh,19px);color:var(--ink3);line-height:1.6;text-align:center;max-width:70ch;margin:0 auto">Hockey Stickman has the content, the expertise, and the Canadian story that AI models should be citing. The gap is structural — and it is fixable in weeks, not months. We have done this for WBM Technologies and Credit Canada. Both had zero AI citations before we started.</p>
   <div style="text-align:center">
-    <a href="${tok(D.agencyWebsite)}" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:8px;text-decoration:none">
+    <a href="https://growthautomated.ai" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:8px;text-decoration:none">
       <span style="font-size:clamp(12px,1.5vh,15px);color:var(--ink4)">Powered by</span>
-      ${agencyLogoHtml}
+      <img src="https://cdn.shopify.com/s/files/1/0813/6707/3081/files/Color_logo_-_no_background_1f36d52b-3764-407f-930c-151eb23683f7.png?v=1740765450" alt="Growth Automated" style="height:clamp(10px,1.4vh,14px);width:auto;opacity:.8">
     </a>
   </div>
 </div>
@@ -1308,7 +635,20 @@ ${hdrHtml(11,n)}
 <!-- SLIDE 12: About Us -->
 <section><div class="s">
 <div class="stripe"></div>
-${hdrHtml(12,n)}
+
+    <div class="hdr">
+      <div style="display:flex;align-items:center;gap:10px">
+        <img src="https://www.google.com/s2/favicons?domain=hockeystickman.ca&sz=128" style="border-radius:10px;width:clamp(26px,3.5vh,40px);height:clamp(26px,3.5vh,40px);object-fit:contain">
+        <span class="tag">SEO / AEO Proposal</span>
+      </div>
+      
+    <div class="hdr-right">
+      <div class="snum">12 / 12</div>
+      <a href="https://growthautomated.ai" target="_blank" rel="noopener" class="powered">
+        <span>Powered by</span><img src="https://cdn.shopify.com/s/files/1/0813/6707/3081/files/Color_logo_-_no_background_1f36d52b-3764-407f-930c-151eb23683f7.png?v=1740765450" alt="Growth Automated" style="height:clamp(10px,1.4vh,14px);width:auto;opacity:.8">
+      </a>
+    </div>
+    </div>
 <div class="divider"></div>
 <div style="flex:1;display:flex;flex-direction:column;justify-content:center;gap:clamp(10px,1.5vh,18px);min-height:0">
   <div>
@@ -1330,7 +670,7 @@ ${hdrHtml(12,n)}
     <div style="background:var(--accent-bg);border:1px solid var(--accent-bd);border-radius:8px;padding:clamp(10px,1.5vh,18px)">
       <div style="font-size:clamp(11px,1.4vh,13px);font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);margin-bottom:6px">Get Started</div>
       <div style="font-size:clamp(14px,2vh,20px);font-weight:700;color:var(--ink);margin-bottom:6px">Book a 30-min call</div>
-      <a href="${tok(D.agencyBooking)||'#'}" target="_blank" rel="noopener" style="font-size:clamp(12px,1.7vh,16px);color:var(--accent);font-weight:600;text-decoration:none">${tok(D.agencyBooking)||'Add your booking link →'}</a>
+      <a href="https://seo-for-ai.growthautomated.ai/book_time" target="_blank" rel="noopener" style="font-size:clamp(12px,1.7vh,16px);color:var(--accent);font-weight:600;text-decoration:none">https://seo-for-ai.growthautomated.ai/book_time</a>
     </div>
   </div>
   <div style="background:var(--paper2);border:1px solid var(--rule);border-radius:8px;padding:clamp(10px,1.4vh,16px) clamp(14px,1.8vw,20px);font-size:clamp(12px,1.55vh,15px);color:var(--ink3);line-height:1.65">
@@ -1342,7 +682,20 @@ ${hdrHtml(12,n)}
 <!-- SLIDE 13: AI Visibility Snapshot -->
 <section><div class="s">
 <div class="stripe"></div>
-${hdrHtml(13,n)}
+
+    <div class="hdr">
+      <div style="display:flex;align-items:center;gap:10px">
+        <img src="https://www.google.com/s2/favicons?domain=hockeystickman.ca&sz=128" style="border-radius:10px;width:clamp(26px,3.5vh,40px);height:clamp(26px,3.5vh,40px);object-fit:contain">
+        <span class="tag">SEO / AEO Proposal</span>
+      </div>
+      
+    <div class="hdr-right">
+      <div class="snum">13 / 12</div>
+      <a href="https://growthautomated.ai" target="_blank" rel="noopener" class="powered">
+        <span>Powered by</span><img src="https://cdn.shopify.com/s/files/1/0813/6707/3081/files/Color_logo_-_no_background_1f36d52b-3764-407f-930c-151eb23683f7.png?v=1740765450" alt="Growth Automated" style="height:clamp(10px,1.4vh,14px);width:auto;opacity:.8">
+      </a>
+    </div>
+    </div>
 <div class="divider"></div>
 <h2 style="margin-top:1vh">AI Visibility <span style="color:var(--accent)">Live Snapshot</span></h2>
 <div style="display:grid;grid-template-columns:200px 1fr;gap:clamp(14px,2vw,24px);flex:1;min-height:0">
@@ -1353,42 +706,86 @@ ${hdrHtml(13,n)}
           <circle cx="60" cy="60" r="50" fill="none" stroke="#E5E7EB" stroke-width="12"/>
           <circle cx="60" cy="60" r="50" fill="none" stroke="var(--accent)" stroke-width="12" stroke-linecap="round"
             stroke-dasharray="314"
-            stroke-dashoffset="${Math.round(314 * (1 - Math.min(100, Math.max(0, parseFloat(D.aiScore)||0)) / 100))}"/>
+            stroke-dashoffset="298"/>
         </svg>
         <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center">
-          <div style="font-size:clamp(20px,3.2vh,30px);font-weight:800;color:var(--accent);font-family:'DM Mono',monospace;line-height:1">${tok(D.aiScore)||'—'}</div>
+          <div style="font-size:clamp(20px,3.2vh,30px);font-weight:800;color:var(--accent);font-family:'DM Mono',monospace;line-height:1">5</div>
           <div style="font-size:10px;color:var(--ink4)">/100</div>
         </div>
       </div>
       <div style="font-size:clamp(11px,1.4vh,13px);color:var(--ink4)">AI Visibility Score</div>
-      <div style="font-size:clamp(12px,1.6vh,15px);font-weight:700;color:var(--ink);margin-top:4px">${tok(D.aiRank)||'—'}</div>
+      <div style="font-size:clamp(12px,1.6vh,15px);font-weight:700;color:var(--ink);margin-top:4px">#1 of 5 tracked brands</div>
       <div style="font-size:10px;color:var(--ink4)">Category Rank</div>
     </div>
     <div class="obox" style="flex:1">
       <div style="font-size:clamp(10px,1.3vh,12px);font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--ink4);margin-bottom:8px">Citations Found</div>
-      <div style="font-size:clamp(18px,2.8vh,28px);font-weight:800;color:var(--ink);font-family:'DM Mono',monospace">${tok(D.aiCitations)||'0'}</div>
-      <div style="font-size:clamp(10px,1.3vh,12px);color:var(--ink4);margin-top:4px">across ${tok(D.aiChats)||'AI prompts tracked'}</div>
+      <div style="font-size:clamp(18px,2.8vh,28px);font-weight:800;color:var(--ink);font-family:'DM Mono',monospace">5 (.com only)</div>
+      <div style="font-size:clamp(10px,1.3vh,12px);color:var(--ink4);margin-top:4px">across 10 prompts tracked</div>
     </div>
   </div>
   <div style="display:flex;flex-direction:column;gap:clamp(10px,1.4vh,14px);min-height:0">
     <div class="obox" style="flex:1;min-height:0;overflow:hidden">
       <div style="font-size:clamp(10px,1.3vh,12px);font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--ink4);margin-bottom:10px">Prompts Tracked — Visibility</div>
       <div style="display:flex;flex-direction:column;gap:6px;overflow-y:auto;max-height:calc(100% - 30px)">
-        ${D.prompts && D.prompts.filter(p=>p.text).map(p => `<div style="display:grid;grid-template-columns:1fr 48px 52px;gap:8px;align-items:center">
-          <div style="font-size:clamp(10px,1.3vh,12px);color:var(--ink3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${tok(p.text)}</div>
-          <div style="font-size:11px;font-weight:700;padding:2px 6px;border-radius:4px;text-align:center;background:${p.status==='mentioned'?'var(--accent-bg)':'#FEF2F2'};color:${p.status==='mentioned'?'var(--accent-dark)':'#DC2626'}">${p.status==='mentioned'?'Cited':'—'}</div>
-          <div style="font-size:11px;color:var(--ink4);text-align:right;font-family:'DM Mono',monospace">${p.score&&p.score!=='0'?p.score+'/100':''}</div>
-        </div>`).join('') || '<div style="color:var(--ink4);font-size:13px">Add prompts in the builder.</div>'}
+        <div style="display:grid;grid-template-columns:1fr 48px 52px;gap:8px;align-items:center">
+          <div style="font-size:clamp(10px,1.3vh,12px);color:var(--ink3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Best hockey sticks for advanced players in 2026?</div>
+          <div style="font-size:11px;font-weight:700;padding:2px 6px;border-radius:4px;text-align:center;background:#FEF2F2;color:#DC2626">—</div>
+          <div style="font-size:11px;color:var(--ink4);text-align:right;font-family:'DM Mono',monospace"></div>
+        </div><div style="display:grid;grid-template-columns:1fr 48px 52px;gap:8px;align-items:center">
+          <div style="font-size:clamp(10px,1.3vh,12px);color:var(--ink3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Do stick flex ratings really matter for casual players?</div>
+          <div style="font-size:11px;font-weight:700;padding:2px 6px;border-radius:4px;text-align:center;background:#FEF2F2;color:#DC2626">—</div>
+          <div style="font-size:11px;color:var(--ink4);text-align:right;font-family:'DM Mono',monospace"></div>
+        </div><div style="display:grid;grid-template-columns:1fr 48px 52px;gap:8px;align-items:center">
+          <div style="font-size:clamp(10px,1.3vh,12px);color:var(--ink3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">How do I figure out the right stick length as a beginner?</div>
+          <div style="font-size:11px;font-weight:700;padding:2px 6px;border-radius:4px;text-align:center;background:#FEF2F2;color:#DC2626">—</div>
+          <div style="font-size:11px;color:var(--ink4);text-align:right;font-family:'DM Mono',monospace"></div>
+        </div><div style="display:grid;grid-template-columns:1fr 48px 52px;gap:8px;align-items:center">
+          <div style="font-size:clamp(10px,1.3vh,12px);color:var(--ink3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Composite vs wooden hockey sticks for intermediate players?</div>
+          <div style="font-size:11px;font-weight:700;padding:2px 6px;border-radius:4px;text-align:center;background:#FEF2F2;color:#DC2626">—</div>
+          <div style="font-size:11px;color:var(--ink4);text-align:right;font-family:'DM Mono',monospace"></div>
+        </div><div style="display:grid;grid-template-columns:1fr 48px 52px;gap:8px;align-items:center">
+          <div style="font-size:clamp(10px,1.3vh,12px);color:var(--ink3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Our rec league needs affordable hockey sticks — options under budget?</div>
+          <div style="font-size:11px;font-weight:700;padding:2px 6px;border-radius:4px;text-align:center;background:var(--accent-bg);color:var(--accent-dark)">Cited</div>
+          <div style="font-size:11px;color:var(--ink4);text-align:right;font-family:'DM Mono',monospace">28/100</div>
+        </div><div style="display:grid;grid-template-columns:1fr 48px 52px;gap:8px;align-items:center">
+          <div style="font-size:clamp(10px,1.3vh,12px);color:var(--ink3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Top-rated hockey sticks for defensemen — what's worth the hype?</div>
+          <div style="font-size:11px;font-weight:700;padding:2px 6px;border-radius:4px;text-align:center;background:#FEF2F2;color:#DC2626">—</div>
+          <div style="font-size:11px;color:var(--ink4);text-align:right;font-family:'DM Mono',monospace"></div>
+        </div><div style="display:grid;grid-template-columns:1fr 48px 52px;gap:8px;align-items:center">
+          <div style="font-size:clamp(10px,1.3vh,12px);color:var(--ink3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">What hockey sticks are youth coaches recommending for beginners?</div>
+          <div style="font-size:11px;font-weight:700;padding:2px 6px;border-radius:4px;text-align:center;background:#FEF2F2;color:#DC2626">—</div>
+          <div style="font-size:11px;color:var(--ink4);text-align:right;font-family:'DM Mono',monospace"></div>
+        </div><div style="display:grid;grid-template-columns:1fr 48px 52px;gap:8px;align-items:center">
+          <div style="font-size:clamp(10px,1.3vh,12px);color:var(--ink3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">What's the proper way to tape a hockey stick blade, and why?</div>
+          <div style="font-size:11px;font-weight:700;padding:2px 6px;border-radius:4px;text-align:center;background:var(--accent-bg);color:var(--accent-dark)">Cited</div>
+          <div style="font-size:11px;color:var(--ink4);text-align:right;font-family:'DM Mono',monospace">25/100</div>
+        </div>
       </div>
     </div>
     <div class="obox" style="flex:0 0 auto">
       <div style="font-size:clamp(10px,1.3vh,12px);font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--ink4);margin-bottom:8px">Who AI Cites Instead</div>
       <div style="display:flex;flex-wrap:wrap;gap:6px">
-        ${D.sources && D.sources.filter(s=>s.domain).slice(0,6).map(s=>`<div style="display:flex;align-items:center;gap:6px;padding:5px 10px;background:var(--paper2);border:1px solid var(--rule);border-radius:6px">
-          <img src="https://www.google.com/s2/favicons?domain=${tok(s.domain)}&sz=16" style="width:14px;height:14px;border-radius:2px" onerror="this.style.display='none'">
-          <span style="font-size:clamp(10px,1.3vh,12px);color:var(--ink3);font-weight:500">${tok(s.domain)}</span>
-          ${s.mentions?`<span style="font-size:10px;color:var(--ink4);font-family:'DM Mono',monospace">${tok(s.mentions)}×</span>`:''}
-        </div>`).join('') || '<div style="color:var(--ink4);font-size:13px">Add citation sources in the builder.</div>'}
+        <div style="display:flex;align-items:center;gap:6px;padding:5px 10px;background:var(--paper2);border:1px solid var(--rule);border-radius:6px">
+          <img src="https://www.google.com/s2/favicons?domain=reddit.com&sz=16" style="width:14px;height:14px;border-radius:2px" onerror="this.style.display='none'">
+          <span style="font-size:clamp(10px,1.3vh,12px);color:var(--ink3);font-weight:500">reddit.com</span>
+          <span style="font-size:10px;color:var(--ink4);font-family:'DM Mono',monospace">42×</span>
+        </div><div style="display:flex;align-items:center;gap:6px;padding:5px 10px;background:var(--paper2);border:1px solid var(--rule);border-radius:6px">
+          <img src="https://www.google.com/s2/favicons?domain=prostockhockey.com&sz=16" style="width:14px;height:14px;border-radius:2px" onerror="this.style.display='none'">
+          <span style="font-size:clamp(10px,1.3vh,12px);color:var(--ink3);font-weight:500">prostockhockey.com</span>
+          <span style="font-size:10px;color:var(--ink4);font-family:'DM Mono',monospace">40×</span>
+        </div><div style="display:flex;align-items:center;gap:6px;padding:5px 10px;background:var(--paper2);border:1px solid var(--rule);border-radius:6px">
+          <img src="https://www.google.com/s2/favicons?domain=youtube.com&sz=16" style="width:14px;height:14px;border-radius:2px" onerror="this.style.display='none'">
+          <span style="font-size:clamp(10px,1.3vh,12px);color:var(--ink3);font-weight:500">youtube.com</span>
+          <span style="font-size:10px;color:var(--ink4);font-family:'DM Mono',monospace">38×</span>
+        </div><div style="display:flex;align-items:center;gap:6px;padding:5px 10px;background:var(--paper2);border:1px solid var(--rule);border-radius:6px">
+          <img src="https://www.google.com/s2/favicons?domain=hockeymonkey.com&sz=16" style="width:14px;height:14px;border-radius:2px" onerror="this.style.display='none'">
+          <span style="font-size:clamp(10px,1.3vh,12px);color:var(--ink3);font-weight:500">hockeymonkey.com</span>
+          <span style="font-size:10px;color:var(--ink4);font-family:'DM Mono',monospace">25×</span>
+        </div><div style="display:flex;align-items:center;gap:6px;padding:5px 10px;background:var(--paper2);border:1px solid var(--rule);border-radius:6px">
+          <img src="https://www.google.com/s2/favicons?domain=icewarehouse.com&sz=16" style="width:14px;height:14px;border-radius:2px" onerror="this.style.display='none'">
+          <span style="font-size:clamp(10px,1.3vh,12px);color:var(--ink3);font-weight:500">icewarehouse.com</span>
+          <span style="font-size:10px;color:var(--ink4);font-family:'DM Mono',monospace">17×</span>
+        </div>
       </div>
     </div>
   </div>
@@ -1399,38 +796,14 @@ ${hdrHtml(13,n)}
 </div></section>
 
 </div></div>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.1.0/reveal.min.js"><\/script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.1.0/reveal.min.js"></script>
 <script>
 Reveal.initialize({hash:true,controls:true,progress:true,slideNumber:false,transition:'none',disableLayout:true,width:1920,height:1080});
 document.querySelectorAll('.s').forEach(function(el){
   el.addEventListener('touchstart',function(e){e.stopPropagation();},{passive:true});
   el.addEventListener('touchmove',function(e){e.stopPropagation();},{passive:true});
 });
-<\/script>
-<a href="./index.html" id="back-to-overview" style="position:fixed;top:18px;right:18px;z-index:9999;display:inline-flex;align-items:center;gap:8px;padding:8px 14px;background:rgba(20,20,28,0.92);color:#fff;font-family:-apple-system,'Inter','DM Sans',sans-serif;font-size:12px;font-weight:600;letter-spacing:0.3px;text-decoration:none;border-radius:999px;box-shadow:0 4px 14px rgba(0,0,0,0.25);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,0.1)"><span style="font-size:14px;line-height:1">←</span><span>Overview</span></a>
-</body>
-</html>`;
-}
-
-function generateAndPreview() {
-  save();
-  const html = fillTemplate();
-  const blob = new Blob([html], {type:'text/html'});
-  const url = URL.createObjectURL(blob);
-  window.open(url, '_blank');
-}
-
-function generateAndDownload() {
-  save();
-  const html = fillTemplate();
-  const blob = new Blob([html], {type:'text/html'});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = `${(D.clientName||'proposal').toLowerCase().replace(/\s+/g,'-')}-proposal.html`;
-  a.click();
-  URL.revokeObjectURL(url);
-}
 </script>
+<a href="./index.html" id="back-to-overview" style="position:fixed;top:18px;right:18px;z-index:9999;display:inline-flex;align-items:center;gap:8px;padding:8px 14px;background:rgba(20,20,28,0.92);color:#fff;font-family:-apple-system,'Inter','DM Sans',sans-serif;font-size:12px;font-weight:600;letter-spacing:0.3px;text-decoration:none;border-radius:999px;box-shadow:0 4px 14px rgba(0,0,0,0.25);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,0.1)"><span style="font-size:14px;line-height:1">←</span><span>Overview</span></a>
 </body>
 </html>
